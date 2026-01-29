@@ -1,3 +1,4 @@
+
 "use client"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -11,31 +12,42 @@ import {
   FieldSeparator,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-
-import { useForm } from "@tanstack/react-form"
 import * as z from "zod";
+import { useForm } from "@tanstack/react-form"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
+
 const formSchema = z.object({
   email: z.email(),
-  password: z.string()
-})
+  password: z.string(),
+  confarm_password: z.string(),
+  name: z.string()
 
-export function LoginForm({
+}).refine((data) => data.password === data.confarm_password, {
+  message: "Password do not match",
+  path: ["confarm_password"]
+}
+)
+
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+
 
 
   const form = useForm({
     defaultValues: {
       email: "",
       password: "",
+      confarm_password: "",
+      name: ""
     },
     validators: {
       onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
+      console.log(value)
       toast("You submitted the following values:", {
         description: (
           <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
@@ -51,19 +63,26 @@ export function LoginForm({
         } as React.CSSProperties,
       })
 
-      const { data, error } = await authClient.signIn.email(value)
-      if(data?.user){
-        toast.success("You are login secessfully",{
+      const signupData = {
+        name: value.name,
+        email: value.email,
+        password: value.password
+      }
+
+      const { data, error } = await authClient.signUp.email(signupData)
+      if (data?.user) {
+        toast.success("Your acount created secessfully", {
           position: "top-center",
-               style: {
-          "color": "green",
-        } as React.CSSProperties,
+          style: {
+            "color": "green",
+          } as React.CSSProperties,
         })
       }
       console.log(data)
       console.log(error)
     },
   })
+
 
 
 
@@ -76,23 +95,53 @@ export function LoginForm({
             onSubmit={(e) => {
               e.preventDefault()
               form.handleSubmit()
-            }}>
+            }}
+          >
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-muted-foreground text-balance">
-                  Login to your account
+                <h1 className="text-2xl font-bold">Create your account</h1>
+                <p className="text-muted-foreground text-sm text-balance">
+                  Enter your email below to create your account
                 </p>
               </div>
-
+              <form.Field
+                name="name"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
+                  return (
+                    <Field>
+                      <FieldLabel htmlFor="name">Name</FieldLabel>
+                      <Input
+                        id={field.name}
+                        type="text"
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        placeholder="Enter your name"
+                        required
+                      />
+                      <FieldDescription>
+                        We&apos;ll use this to contact you. We will not share your
+                        email with anyone else.
+                      </FieldDescription>
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  )
+                }}
+              />
               <form.Field
                 name="email"
                 children={(field) => {
                   const isInvalid =
                     field.state.meta.isTouched && !field.state.meta.isValid
                   return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                    <Field>
+                      <FieldLabel htmlFor="email">Email</FieldLabel>
                       <Input
                         id={field.name}
                         type="email"
@@ -101,9 +150,13 @@ export function LoginForm({
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
                         aria-invalid={isInvalid}
-                        placeholder="Login button not working on mobile"
-                        // autoComplete="off"
+                        placeholder="m@example.com"
+                        required
                       />
+                      <FieldDescription>
+                        We&apos;ll use this to contact you. We will not share your
+                        email with anyone else.
+                      </FieldDescription>
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
                       )}
@@ -112,36 +165,72 @@ export function LoginForm({
                 }}
               />
 
-              <form.Field
-                name="password"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="password"
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        aria-invalid={isInvalid}
-                        placeholder="Login button not working on mobile"
-                        // autoComplete="off"
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  )
-                }}
-              />
-
-           
               <Field>
-                <Button type="submit">Login</Button>
+                <Field className="grid grid-cols-2 gap-4">
+                  <form.Field
+                    name="password"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid
+                      return (
+                        <Field>
+                          <FieldLabel htmlFor="password">Password</FieldLabel>
+                          <Input
+
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            type="password"
+                            required />
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+
+
+                      )
+                    }}
+                  />
+                  <form.Field
+                    name="confarm_password"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid
+                      return (
+                        <Field>
+                          <FieldLabel htmlFor="confirm-password">
+                            Confirm Password
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            type="password"
+                            required />
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+
+                      )
+                    }}
+                  />
+                </Field>
+                <FieldDescription>
+                  Must be at least 8 characters long.
+                </FieldDescription>
+
+              </Field>
+
+
+              <Field>
+                <Button type="submit">Create Account</Button>
               </Field>
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
@@ -154,7 +243,7 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Apple</span>
+                  <span className="sr-only">Sign up with Apple</span>
                 </Button>
                 <Button variant="outline" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -163,7 +252,7 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Google</span>
+                  <span className="sr-only">Sign up with Google</span>
                 </Button>
                 <Button variant="outline" type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -172,17 +261,18 @@ export function LoginForm({
                       fill="currentColor"
                     />
                   </svg>
-                  <span className="sr-only">Login with Meta</span>
+                  <span className="sr-only">Sign up with Meta</span>
                 </Button>
               </Field>
+
               <FieldDescription className="text-center">
-                Don&apos;t have an account? <a href="#">Sign up</a>
+                Already have an account? <a href="#">Sign in</a>
               </FieldDescription>
             </FieldGroup>
           </form>
           <div className="bg-muted relative hidden md:block">
             <img
-              src="login.jpg"
+              src="/placeholder.svg"
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />

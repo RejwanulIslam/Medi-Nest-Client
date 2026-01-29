@@ -27,6 +27,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ModeToggle } from "./ModeTogle";
+import { useEffect, useState } from "react";
 
 interface MenuItem {
   title: string;
@@ -83,6 +84,14 @@ const Navbar1 = ({
   },
   className,
 }: Navbar1Props) => {
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null; 
+
   return (
     <section className={cn("py-4", className)}>
       <div className="container">
