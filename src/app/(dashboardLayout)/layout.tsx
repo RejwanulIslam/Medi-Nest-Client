@@ -15,15 +15,17 @@ import {
 } from "@/components/ui/sidebar"
 import { userService } from "@/service/user.service"
 import React, { Children, use } from "react"
+import { da } from "zod/v4/locales"
 
 
 
 export default async function DashboardLayout({ user, seler, admin }: { user: React.ReactNode, seler: React.ReactNode, admin: React.ReactNode }) {
     const { data } = await userService.getSeation()
     console.log(data)
+    const userInfo=data.user
     return (
         <SidebarProvider>
-            <AppSidebar />
+            <AppSidebar user={userInfo} />
             <SidebarInset>
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
                     <SidebarTrigger className="-ml-1" />
