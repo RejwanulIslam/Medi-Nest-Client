@@ -15,14 +15,36 @@ import {
 } from "@/components/ui/sidebar"
 import { userService } from "@/service/user.service"
 import React, { Children, use } from "react"
-import { da } from "zod/v4/locales"
 
 
 
 export default async function DashboardLayout({ user, seler, admin }: { user: React.ReactNode, seler: React.ReactNode, admin: React.ReactNode }) {
     const { data } = await userService.getSeation()
     console.log(data)
-    const userInfo=data.user
+    const userInfo = data.user
+
+    let mainContent: React.ReactNode = null;
+    let pageTitle: string = "";
+
+    switch (userInfo.role) {
+        case "USER":
+            mainContent = user;
+            pageTitle = "User Dashboard";
+            break;
+        case "SELER":
+            mainContent = seler;
+            pageTitle = "Seler Dashboard";
+            break;
+        case "ADMIN":
+            mainContent = admin;
+            pageTitle = "Admin Dashboard";
+            break;
+        default:
+            mainContent = user;
+            pageTitle = "Dashboard";
+    }
+
+
     return (
         <SidebarProvider>
             <AppSidebar user={userInfo} />
@@ -42,10 +64,7 @@ export default async function DashboardLayout({ user, seler, admin }: { user: Re
                             </BreadcrumbItem>
                             <BreadcrumbSeparator className="hidden md:block" />
                             <BreadcrumbItem>
-                                {/* <BreadcrumbPage>Data Fetching</BreadcrumbPage> */}
-                                {data.user.role == "USER" && user}
-                                {data.user.role == "SELER" && seler}
-                                {data.user.role == "ADMIN" && admin}
+                                <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
 
                             </BreadcrumbItem>
                         </BreadcrumbList>
@@ -54,10 +73,7 @@ export default async function DashboardLayout({ user, seler, admin }: { user: Re
                 <div className="flex flex-1 flex-col gap-4 p-4">
                     <div>
 
-
-                        {data.user.role == "USER" && user}
-                        {data.user.role == "SELER" && seler}
-                        {data.user.role == "ADMIN" && admin}
+                        {mainContent}
 
                     </div>
                 </div>

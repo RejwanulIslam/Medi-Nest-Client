@@ -6,8 +6,8 @@ export const selerRoutes:Route[]=[
       items: [
        
         {
-          title: "Create Blog",
-          url: "/dashboard/create-blog",
+          title: "Add Medicine",
+          url: "/seler-dashboard/add-medicine",
         },
         {
           title: "History",

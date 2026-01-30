@@ -1,3 +1,4 @@
+import { CreateMedicineInput } from "@/types";
 import { cookies } from "next/headers";
 const API_URL = process.env.API_URL
 interface getBlogParams {
@@ -51,7 +52,9 @@ export const medicineService = {
     },
     getMdicineById: async function (id: string) {
         try {
-            const res = await fetch(`${API_URL}/api/medicines/${id}`)
+            const res = await fetch(`${API_URL}/api/medicines/${id}`,{
+                cache:"no-store"
+            })
             const data = await res.json()
             return { data: data, error: null }
         } catch (error: any) {
@@ -59,11 +62,11 @@ export const medicineService = {
         }
     },
 
-    createMedicine: async function (blogData: blogData) {
+    createMedicine: async function (blogData:CreateMedicineInput) {
         try {
             const cookieStore = await cookies()
 
-            const res = await fetch(`${API_URL}/post`, {
+            const res = await fetch(`${API_URL}/api/seller/medicines`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { IMedicine } from "@/types"
+import Link from "next/link"
 
 export function MedicineCard({data}:{data:IMedicine}) {
   return (
@@ -52,7 +53,8 @@ export function MedicineCard({data}:{data:IMedicine}) {
         </p>
 
         <Button disabled={data.stock === 0}>
-          View Details
+            <Link href={`/allmedicine/${data.id}`}>View Details</Link>
+          
         </Button>
       </CardFooter>
     </Card>
