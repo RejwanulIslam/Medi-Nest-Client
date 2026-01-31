@@ -18,7 +18,6 @@ export default async function page({ params }: { params: Promise<{ id: string }>
       <Card>
         <CardContent className="grid grid-cols-1 gap-8 p-6 md:grid-cols-2">
 
-          {/* ===== Left: Image ===== */}
           <div className="relative">
             <img
               src={data?.image ?? "https://i.ibb.co.com/yc1DkDrb/colorful-pills-syringe.jpg"}
@@ -37,7 +36,6 @@ export default async function page({ params }: { params: Promise<{ id: string }>
             )}
           </div>
 
-          {/* ===== Right: Info ===== */}
           <div className="flex flex-col gap-4">
             <CardHeader className="p-0">
               <CardTitle className="text-2xl">
