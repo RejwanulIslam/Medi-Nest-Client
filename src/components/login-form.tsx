@@ -60,8 +60,7 @@ export function LoginForm({
         } as React.CSSProperties,
         })
       }
-      console.log(data)
-      console.log(error)
+
     },
   })
 

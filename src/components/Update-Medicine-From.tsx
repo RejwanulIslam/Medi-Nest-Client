@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { updateMedicine } from "@/action/blog.action";
+import { updateMedicine } from "@/action/medicine.action";
 
 
 
@@ -33,9 +33,7 @@ export const UpdateMedicineForm = ({
       title: "",
     },
     onSubmit: async ({ value }) => {
-      console.log("Submitting updated medicine:", value);
      const res= await updateMedicine(value,id);
-     console.log(res)
     },
   });
 

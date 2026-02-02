@@ -6,13 +6,12 @@ import { IMedicine } from '@/types'
 import React from 'react'
 
 export default async function page() {
-    const {data}=await categoryService.getCategory()
-    const {data:medData}=await medicineService.getMedicine()
+    const { data } = await categoryService.getCategory()
+    const { data: medData } = await medicineService.getMedicine()
     console.log(data)
-  return (
-    <div>
-        <MedicineCard medCategory={data} medData={medData}></MedicineCard>
-        
-    </div>
-  )
+    return (
+        <div>
+            <MedicineCard medCategory={data} medData={medData}></MedicineCard>
+        </div>
+    )
 }

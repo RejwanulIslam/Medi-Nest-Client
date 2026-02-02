@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { createMedicine } from "@/action/blog.action";
+import { createMedicine } from "@/action/medicine.action";
+import { toast } from "sonner";
 
 
 
@@ -38,6 +39,9 @@ const AddMedicineForm = ({categories,userId}:{categories:any,userId:string}) => 
       sellerId: userId
       }
     const data=  await createMedicine(info);
+    if(data){
+      toast.success("your medecine is added")
+    }
     console.log(data)
     },
   });

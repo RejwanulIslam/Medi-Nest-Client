@@ -1,10 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { addCard, deleteMedicine } from "@/action/medicine.action";
 
 export const SelerMedicineCard= ({medicine}:{medicine:any}) => {
   if (!medicine) return <p>No medicine data</p>;
-  console.log("Medicine Card Data:", medicine);
+
+  const handledelete=async(id:string)=>{
+    const res=await deleteMedicine(id)
+  }
+
 
   return (
     <Card className=" shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -30,7 +37,7 @@ export const SelerMedicineCard= ({medicine}:{medicine:any}) => {
       <CardFooter className="flex justify-between">
         <Link href={`/seler-dashboard/manage-medicine/${medicine.id}`}> <Button variant="outline">Update</Button></Link>
        
-        <Button variant="destructive">Delete</Button>
+        <Button variant="destructive" onClick={()=>handledelete(medicine.id)}>Delete</Button>
       </CardFooter>
     </Card>
   );

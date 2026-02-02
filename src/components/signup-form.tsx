@@ -16,12 +16,16 @@ import * as z from "zod";
 import { useForm } from "@tanstack/react-form"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 
 const formSchema = z.object({
   email: z.email(),
   password: z.string(),
   confarm_password: z.string(),
-  name: z.string()
+  name: z.string(),
+  image: z.string(),
+  role: z.enum(["USER", "SELER"]),
+
 
 }).refine((data) => data.password === data.confarm_password, {
   message: "Password do not match",
@@ -41,7 +45,10 @@ export function SignupForm({
       email: "",
       password: "",
       confarm_password: "",
-      name: ""
+      name: "",
+      image: "",
+      role: "USER",
+
     },
     validators: {
       onSubmit: formSchema,
@@ -66,7 +73,9 @@ export function SignupForm({
       const signupData = {
         name: value.name,
         email: value.email,
-        password: value.password
+        password: value.password,
+        image: value.image,
+        role: value.role,
       }
 
       const { data, error } = await authClient.signUp.email(signupData)
@@ -78,12 +87,24 @@ export function SignupForm({
           } as React.CSSProperties,
         })
       }
+      if (error?.status === 422) {
+        toast.error("User already exists")
+      }
       console.log(data)
       console.log(error)
     },
   })
 
 
+
+  // google login
+    const handleGooglrLogin = async () => {
+    const data = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "http://localhost:3000"
+    });
+    console.log(data)
+  }
 
 
   return (
@@ -123,10 +144,7 @@ export function SignupForm({
                         placeholder="Enter your name"
                         required
                       />
-                      <FieldDescription>
-                        We&apos;ll use this to contact you. We will not share your
-                        email with anyone else.
-                      </FieldDescription>
+
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
                       )}
@@ -153,10 +171,7 @@ export function SignupForm({
                         placeholder="m@example.com"
                         required
                       />
-                      <FieldDescription>
-                        We&apos;ll use this to contact you. We will not share your
-                        email with anyone else.
-                      </FieldDescription>
+
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
                       )}
@@ -164,6 +179,68 @@ export function SignupForm({
                   )
                 }}
               />
+              <form.Field
+                name="image"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
+                  return (
+                    <Field>
+                      <FieldLabel htmlFor="text">Image Url</FieldLabel>
+                      <Input
+                        id={field.name}
+                        type="text"
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        placeholder="enter Your image url"
+                      // required
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  )
+                }}
+              />
+
+
+              <form.Field
+                name="role"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid
+
+                  return (
+                    <Field>
+                      <FieldLabel>User Role</FieldLabel>
+
+                      <Select
+                        value={field.state.value}
+                        onValueChange={field.handleChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          <SelectItem value="USER">User</SelectItem>
+                          <SelectItem value="SELER">Seller</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  )
+                }}
+              />
+
+
+
 
               <Field>
                 <Field className="grid grid-cols-2 gap-4">
@@ -245,7 +322,7 @@ export function SignupForm({
                   </svg>
                   <span className="sr-only">Sign up with Apple</span>
                 </Button>
-                <Button variant="outline" type="button">
+                <Button variant="outline" onClick={()=>handleGooglrLogin()} type="button">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
                       d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"

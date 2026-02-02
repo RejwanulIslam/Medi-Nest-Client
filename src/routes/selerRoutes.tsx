@@ -8,10 +8,17 @@ export const selerRoutes:Route[]=[
         {
           title: "Add Medicine",
           url: "/seler-dashboard/add-medicine",
+          isActive:true
         },
         {
-          title: "History",
-          url: "/dashboard/history",
+          title: "Manage Medicine",
+          url: "/seler-dashboard/manage-medicine",
+          isActive:true
+        },
+        {
+          title: "Viws Order",
+          url: "/seler-dashboard/viwsorder",
+          isActive:true
         },
       ],
     }

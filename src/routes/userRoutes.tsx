@@ -6,13 +6,21 @@ export const userRoutes:Route[]=[
       items: [
        
         {
-          title: "Create Blog",
-          url: "/user-dashboard",
+          title: "My Order",
+          url: "/user-dashboard/myorder",
+          isActive:true
         },
         {
-          title: "History",
-          url: "/dashboard/history",
+          title: "Manage Profile",
+          url: "/user-dashboard/manage-profile",
+          isActive:true
         },
+        {
+          title: "My Card",
+          url: "/user-dashboard/mycard",
+          isActive:true
+        },
+     
       ],
     }
 ]

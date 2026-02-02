@@ -1,10 +1,15 @@
+
+
 import { CreateMedicineInput } from "@/types";
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 const API_URL = process.env.API_URL
-interface getBlogParams {
-    isFutured?: boolean;
-    serch?: string;
-    page?: string;
+export type getBlogParams = {
+  serch?: string
+  category?: string
+  minPrice?: string
+  maxPrice?: string
+  manufacturer?: string
 }
 interface serviceOptions {
     cache?: RequestCache;
@@ -19,7 +24,7 @@ export interface blogData {
 export const medicineService = {
 
 
-    getMedicine: async function (params?: getBlogParams, options?: serviceOptions) {
+    getMedicine: async function (params?: getBlogParams) {
         try {
             const url = new URL(`${API_URL}/api/medicines`)
             if (params) {
@@ -29,16 +34,8 @@ export const medicineService = {
                     }
                 })
             }
-            const config: RequestInit = {}
-            if (options?.cache) {
-                config.cache = options.cache
-            }
-            if (options?.revalidate) {
-                config.next = { revalidate: options.revalidate }
-            }
-            config.next = { ...config, tags: ['blog-post'] }
 
-            const res = await fetch(url.toString(), config)
+            const res = await fetch(url.toString())
             const data = await res.json()
             return { data: data, error: null }
 
@@ -60,7 +57,6 @@ export const medicineService = {
 
 
     updateMedicine: async (data: any, id: string) => {
-        console.log("📤 Sending update request", { id, data });
         const cookieStore = await cookies()
         try {
             const res = await fetch(`${API_URL}/api/medicines/${id}`, {
@@ -75,31 +71,59 @@ export const medicineService = {
                 cache: "no-store"
             });
 
-            // Always read as text first (safe for non-JSON responses)
-            const rawText = await res.text();
-            console.log("📥 Raw server response:", rawText);
+            const result = await res.json()
 
-            // If server returned error status
-            if (!res.ok) {
-                throw new Error(
-                    `Request failed (${res.status}): ${rawText || res.statusText}`
-                );
-            }
 
-            // Try to parse JSON safely
-            let parsedData: any;
-            try {
-                parsedData = rawText ? JSON.parse(rawText) : null;
-            } catch {
-                throw new Error("Server did not return valid JSON");
-            }
+            if (result.error) {
+                return {
+                    data: null,
+                    error: { message: result.error || "Error:post is not created" }
+
+                }
+            };
+            return { data: result, error: null }
+        } catch (error: any) {
 
             return {
-                data: parsedData,
-                error: null,
+                data: null,
+                error: {
+                    message: error.message || "Failed to update medicine",
+                },
             };
+        }
+    },
+
+
+    deleteMedicine: async (id: string) => {
+
+
+        const cookieStore = await cookies()
+        try {
+            const res = await fetch(`${API_URL}/api/medicines/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Cookie: cookieStore.toString(),
+                    "Content-Type": "application/json",
+
+                },
+                credentials: 'include',
+                cache: "no-store",
+            });
+
+            const result = await res.json()
+
+
+            if (result.error) {
+                return {
+                    data: null,
+                    error: { message: result.error || "Error:post is not created" }
+
+                }
+            };
+            revalidatePath("/seller-dashboard/manage-medicine")
+
+            return { data: result, error: null }
         } catch (error: any) {
-            console.error("❌ Update medicine failed:", error.message);
 
             return {
                 data: null,
