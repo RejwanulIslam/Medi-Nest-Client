@@ -17,6 +17,7 @@ import { useForm } from "@tanstack/react-form"
 import { toast } from "sonner"
 import { authClient } from "@/lib/auth-client"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { redirect } from "next/navigation"
 
 const formSchema = z.object({
   email: z.email(),
@@ -86,6 +87,7 @@ export function SignupForm({
             "color": "green",
           } as React.CSSProperties,
         })
+         redirect("/")
       }
       if (error?.status === 422) {
         toast.error("User already exists")
@@ -104,6 +106,7 @@ export function SignupForm({
       callbackURL: "http://localhost:3000"
     });
     console.log(data)
+     redirect("/")
   }
 
 

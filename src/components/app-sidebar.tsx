@@ -25,6 +25,7 @@ import { selerRoutes } from "@/routes/selerRoutes"
 
 
 export function AppSidebar({ user, ...props }: { user: userRole & React.ComponentProps<typeof Sidebar> }) {
+  console.log('first',user)
     if (!user) return null
   let routes: Route[] = []
 

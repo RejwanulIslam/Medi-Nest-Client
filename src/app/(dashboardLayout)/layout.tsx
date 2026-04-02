@@ -1,4 +1,3 @@
-import { getSeation } from "@/action/medicine.action"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
     Breadcrumb,
@@ -20,14 +19,14 @@ import React, { Children, use } from "react"
 
 export const dynamic = 'force-dynamic';
 export default async function DashboardLayout({ user, seler, admin }: { user: React.ReactNode, seler: React.ReactNode, admin: React.ReactNode }) {
-    const res = await getSeation()
-    console.log(res)
-    const userInfo = res.user
-
+    const res = await userService.getSeation()
+   
+    const userInfo = res?.data?.user
+ console.log('res', res)
     let mainContent: React.ReactNode = null;
     let pageTitle: string = "";
 
-    switch (userInfo.role) {
+    switch (userInfo?.role) {
         case "USER":
             mainContent = user;
             pageTitle = "User Dashboard";

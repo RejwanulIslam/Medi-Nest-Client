@@ -7,7 +7,7 @@ import { Button } from "./ui/button"
 import { Separator } from "./ui/separator"
 import { Input } from "./ui/input"
 import { addCard, addReview, getReview } from "@/action/medicine.action"
-import { toast } from "sonner"
+import { toast, Toaster } from "sonner"
 
 export default function DetelsPage({
   data,
@@ -33,11 +33,18 @@ export default function DetelsPage({
   }
 
   const addCardHandle = async () => {
-    await addCard({
+    if(!userid){
+      return toast.error("Plase Login")
+    }
+  const card=  await addCard({
+
       customerId: userid,
       productId: data.id,
       quantity,
     })
+    if(card){
+return toast.success("catd added sucessfully")
+    }
   }
 
   const hasOrdered = userOrders?.some(
@@ -85,37 +92,36 @@ export default function DetelsPage({
                 data?.image ??
                 "https://i.ibb.co/yc1DkDrb/colorful-pills-syringe.jpg"
               }
-              alt={data.medicineName}
+              alt={data?.medicineName}
               className="w-full rounded-lg object-cover"
             />
 
             <Badge
-              className={`absolute left-3 top-3 ${
-                data.stock > 0 ? "bg-green-600" : "bg-red-600"
-              }`}
+              className={`absolute left-3 top-3 ${data?.stock > 0 ? "bg-green-600" : "bg-red-600"
+                }`}
             >
-              {data.stock > 0 ? "In Stock" : "Out of Stock"}
+              {data?.stock > 0 ? "In Stock" : "Out of Stock"}
             </Badge>
           </div>
 
           <div className="flex flex-col gap-4">
             <CardHeader className="p-0">
               <CardTitle className="text-2xl">
-                {data.medicineName}
+                {data?.medicineName}
               </CardTitle>
             </CardHeader>
 
             <p className="text-sm text-muted-foreground">
               Manufacturer:{" "}
-              <span className="font-medium">{data.manufacturer}</span>
+              <span className="font-medium">{data?.manufacturer}</span>
             </p>
 
             <Badge variant="secondary">
-              Category: {data.categorie?.categorieName}
+              Category: {data?.categorie?.categorieName}
             </Badge>
 
             <p className="text-3xl font-bold text-primary">
-              ৳ {data.price}
+              ৳ {data?.price}
             </p>
 
             <div className="flex items-center gap-3">
@@ -134,7 +140,7 @@ export default function DetelsPage({
                   variant="ghost"
                   size="sm"
                   onClick={increaseQty}
-                  disabled={quantity === data.stock}
+                  disabled={quantity === data?.stock}
                 >
                   +
                 </Button>
@@ -160,7 +166,7 @@ export default function DetelsPage({
               Medicine Details
             </h3>
             <p className="text-sm text-muted-foreground">
-              {data.detels}
+              {data?.detels}
             </p>
           </div>
 
@@ -170,7 +176,7 @@ export default function DetelsPage({
 
             {!hasOrdered && (
               <p className="text-sm text-red-500">
-                * রিভিউ দিতে হলে আগে অর্ডার করতে হবে
+                To leave a review, you must order first.
               </p>
             )}
 

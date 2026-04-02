@@ -11,9 +11,13 @@ import { CreateMedicineInput } from "@/types";
 export const getSeation = async () => {
   try {
     const res = await userService.getSeation();
-    if (res.error) throw new Error(res.error.message);
+    if (res.error) {
+      console.warn("Session error:", res.error.message);
+      return null;
+    }
     return res.data;
   } catch (error: any) {
+    console.error("Get session error:", error.message);
     return null;
   }
 };

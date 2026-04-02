@@ -1,30 +1,45 @@
 import { cookies } from "next/headers"
 const API_URL = process.env.API_URL
-import { revalidatePath } from "next/cache";
 
 
 const AUTH_URL = process.env.AUTH_URL
 console.log(AUTH_URL)
 export const userService = {
     getSeation: async function () {
-        try {
-            const cookisStore = await cookies()
-            const res = await fetch(`${AUTH_URL}/get-session`, {
-                headers: { Cookie: cookisStore.toString() },
-                cache: "no-store"
+        const cookieStore = await cookies();
 
+
+        try {
+            const res = await fetch(`${AUTH_URL}/get-session`, {
+
+                headers: { cookie: cookieStore.toString() },
+                cache: "no-store",
             })
-            const seation = await res.json()
-            console.log(seation)
-            if (seation == null) {
-                return { data: null, error: { message: "your seation is null" } }
+
+            // check response
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error("Auth Server Error Text:", errorText);
+                return { data: null, error: { message: "Session unauthorized" } };
+            }
+            
+            // check valid json
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                return { data: null, error: { message: "Invalid JSON response from server" } };
             }
 
+            const seation = await res.json()
+            console.log("seation", seation)
+            console.log("Session Response:", seation)
+            if (!seation || !seation.user) {
+                return { data: null, error: { message: "No session found" } }
+            }
 
             return { data: seation, error: null }
-        } catch (error) {
-            return { data: null, error: { message: "some thing is worng" } }
-
+        } catch (error: any) {
+            console.error("Session fetch error:", error)
+            return { data: null, error: { message: error.message || "Failed to fetch session" } }
         }
     },
 

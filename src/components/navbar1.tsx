@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/sheet";
 import { ModeToggle } from "./ModeTogle";
 import { useEffect, useState } from "react";
+import { getSeation } from "@/action/medicine.action";
+import { authClient } from "@/lib/auth-client";
 
 interface MenuItem {
   title: string;
@@ -67,30 +69,64 @@ const Navbar1 = ({
     title: "Medi Nest",
   },
   menu = [
-    { title: "Home", url: "#" },
+    { title: "Home", url: "/" },
 
     {
-      title: "Pricing",
-      url: "#",
+      title: "All Medicine",
+      url: "/allmedicine",
     },
     {
-      title: "Blog",
-      url: "#",
+      title: "Dashboard",
+      url: "/user-dashboard",
     },
+
   ],
   auth = {
-    login: { title: "Login", url: "#" },
-    signup: { title: "Sign up", url: "#" },
+    login: { title: "Login", url: "/login" },
+    signup: { title: "Sign up", url: "/signup" },
   },
   className,
 }: Navbar1Props) => {
 
   const [mounted, setMounted] = useState(false);
+  const [seation, setSeation] = useState(null);
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null; 
+  useEffect(() => {
+    async function fetchSeation() {
+      try {
+        const data = await getSeation();
+        if (data && data.user) {
+          setSeation(data.user);
+        } else {
+          setSeation(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch session:", error);
+        setSeation(null);
+      }   
+    }
+    if (mounted) {
+      fetchSeation();
+    }
+  }, [mounted]);
+
+  const logOut = async () => {
+    await authClient.signOut()
+    setSeation(null)
+    console.log("dksdkfjekfjefjekfjekfjejfefjek")
+  }
+
+  if (!mounted) return null;
+
+
+
+
+
+
 
   return (
     <section className={cn("py-4", className)}>
@@ -120,12 +156,16 @@ const Navbar1 = ({
           <div className="flex gap-2">
             <ModeToggle></ModeToggle>
 
-            <Button asChild variant="outline" size="sm">
+
+            {!seation && <Button asChild variant="outline">
               <a href={auth.login.url}>{auth.login.title}</a>
-            </Button>
-            <Button asChild size="sm">
+            </Button>}
+            {!seation && <Button asChild>
               <a href={auth.signup.url}>{auth.signup.title}</a>
-            </Button>
+            </Button>}
+            {
+              seation && <Button onClick={() => logOut()}>Logout</Button>
+            }
           </div>
         </nav>
 
@@ -168,12 +208,17 @@ const Navbar1 = ({
                   </Accordion>
 
                   <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
+
+                    {!seation && <Button asChild variant="outline">
                       <a href={auth.login.url}>{auth.login.title}</a>
-                    </Button>
-                    <Button asChild>
+                    </Button>}
+                    {!seation && <Button asChild>
                       <a href={auth.signup.url}>{auth.signup.title}</a>
-                    </Button>
+                    </Button>}
+                    {
+                      seation && <Button onClick={() => logOut()}>Logout</Button>
+                    }
+
                   </div>
                 </div>
               </SheetContent>

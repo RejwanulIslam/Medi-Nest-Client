@@ -20,7 +20,7 @@ export default async function page({ params }: { params: Promise<{ id: string }>
     console.log(data)
      const { data:seation } = await userService.getSeation()
         console.log(data)
-        const userid = seation.user.id
+        const userid = seation?.user?.id
 
   return (
    <div>

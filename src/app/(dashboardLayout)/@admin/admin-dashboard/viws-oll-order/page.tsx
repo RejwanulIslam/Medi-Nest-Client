@@ -1,5 +1,5 @@
 import { getAllOrder } from '@/action/medicine.action'
-import MyOrderCard from '@/components/MyOrderCard'
+import MyOrderCard from '@/components/MyOrder'
 import { userService } from '@/service/user.service'
 import React from 'react'
 
