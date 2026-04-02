@@ -439,20 +439,18 @@ interface PageProps {
 //  Details Page ─
 
 export default async function OrderDetailsPage({ params }: PageProps) {
-  const ORDERS = await orderService.getAllOrder()
-  console.log("ORDERS", ORDERS)
   const resolvedParams = await params
   const id = resolvedParams.id;
-  console.log("ierurueiru", id)
-  const order = ORDERS?.data?.find((o: any) => o?.orderId === id);
-  if (!order) notFound();
-  console.log("ORDERS", order)
+  const ORDERS = await orderService.getAllOrder()
+  const orderById = ORDERS?.data?.filter((order: any) => order.orderId == id)
+  if (!orderById) notFound();
+  console.log("ORDERS", orderById)
 
+  console.log("ierurueiru", id)
+  const order = ORDERS?.data?.find((o: any) => o?.orderId == id);
+
+  console.log("order1234", order)
   const cfg = statusConfig[order.status as keyof typeof statusConfig];
-  const calculatedTotal = ORDERS.data.reduce(
-    (sum: any, i: any) => sum + i?.product?.price || 0 * i?.quantity || 0,
-    0
-  );
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 transition-colors duration-300">
@@ -460,7 +458,7 @@ export default async function OrderDetailsPage({ params }: PageProps) {
       <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <Link
-            href="/orders"
+            href="/user-dashboard/myorder"
             className="flex items-center gap-1.5 text-sm font-medium text-zinc-500 hover:text-teal-600 dark:text-zinc-400 dark:hover:text-teal-400 transition-colors"
           >
             <IconBack />
@@ -506,7 +504,7 @@ export default async function OrderDetailsPage({ params }: PageProps) {
                     Customer ID
                   </p>
                   <p className="text-sm font-mono font-semibold text-zinc-700 dark:text-zinc-200">
-                    {order?.customerId?.slice(0, 12)}…
+                    {order?.order?.customerId?.slice(0, 12)}…
                   </p>
                 </div>
               </div>
@@ -518,7 +516,7 @@ export default async function OrderDetailsPage({ params }: PageProps) {
                     Ship to
                   </p>
                   <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-200 capitalize">
-                    {order?.shippingAddress}
+                    {order?.order?.shippingAddress}
                   </p>
                 </div>
               </div>
@@ -530,7 +528,7 @@ export default async function OrderDetailsPage({ params }: PageProps) {
                     Placed on
                   </p>
                   <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
-                    {formatDate(order?.createdAt)}
+                    {formatDate(order?.order?.createdAt)}
                   </p>
                 </div>
               </div>
@@ -541,7 +539,7 @@ export default async function OrderDetailsPage({ params }: PageProps) {
               <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-4">
                 Order Progress
               </p>
-              <StatusTimeline status={order.status} />
+              <StatusTimeline status={order?.order?.status} />
             </div>
           </div>
         </div>
@@ -553,11 +551,11 @@ export default async function OrderDetailsPage({ params }: PageProps) {
               Ordered Items
             </h2>
             <span className="text-xs bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 px-2 py-1 rounded-md">
-              {order?.items?.length} item{order?.items?.length !== 1 ? "s" : ""}
+              {orderById?.length} item{orderById?.length !== 1 ? "s" : ""}
             </span>
           </div>
           <div className="p-4 space-y-3">
-            {order?.items?.map((item: any) => (
+            {orderById?.map((item: any) => (
               <MedicineRow key={item.id} item={item} />
             ))}
           </div>
@@ -572,7 +570,7 @@ export default async function OrderDetailsPage({ params }: PageProps) {
           </div>
           <div className="p-5 space-y-3">
             {/* Per item breakdown */}
-            {ORDERS.data.map((item: any) => (
+            {orderById.map((item: any) => (
               <div
                 key={item.id}
                 className="flex justify-between text-sm text-zinc-500 dark:text-zinc-400"
@@ -591,7 +589,7 @@ export default async function OrderDetailsPage({ params }: PageProps) {
             <div className="border-t border-zinc-100 dark:border-zinc-800 pt-3">
               <div className="flex justify-between text-sm text-zinc-500 dark:text-zinc-400 mb-1.5">
                 <span>Subtotal</span>
-                <span>৳{calculatedTotal.toFixed(2)}</span>
+                <span>৳{order?.order?.totalAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-zinc-500 dark:text-zinc-400">
                 <span>Delivery fee</span>
@@ -607,18 +605,10 @@ export default async function OrderDetailsPage({ params }: PageProps) {
                 Total
               </span>
               <span className="text-xl font-bold text-teal-600 dark:text-teal-400">
-                {/* ৳{order?.totalAmount?.toFixed(2)}
-                 */}
+
                 {
-                  
-                    ORDERS?.data?.reduce(
-                      (sum: number, item: any) => sum + (item?.order?.totalAmount || 0),
-                      0
-                    )
+                  order?.order?.totalAmount.toFixed(2)
                 }
-
-                  
-
               </span>
             </div>
           </div>
@@ -627,7 +617,7 @@ export default async function OrderDetailsPage({ params }: PageProps) {
         {/*  Actions  */}
         <div className="flex gap-3 pb-6">
           <Link
-            href="/orders"
+            href="/user-dashboard/myorder/"
             className="flex-1 text-center py-3 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 font-semibold text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
           >
             ← Back to Orders

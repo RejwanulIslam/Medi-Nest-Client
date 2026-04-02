@@ -7,7 +7,6 @@ export default async function page() {
   const {data}=await userService.getSeation()
   const ORDER=await orderService.myOrders(data.user.id)
 
-  console.log("orderdata",ORDER,'jjfjjfjf',data.user.id)
   return (
     <div>
       <MyOrdersCompnent ORDERS={ORDER}></MyOrdersCompnent>

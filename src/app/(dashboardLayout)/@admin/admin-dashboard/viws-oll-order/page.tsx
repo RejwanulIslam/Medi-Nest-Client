@@ -1,7 +1,5 @@
 import { getAllOrder } from '@/action/medicine.action'
-import MyOrderCard from '@/components/MyOrder'
-import { userService } from '@/service/user.service'
-import React from 'react'
+import OrderCard from '@/components/order/MyOrderCard'
 
 export default async function ViwsOllOrder() {
   const allOrders= await getAllOrder()
@@ -9,7 +7,7 @@ export default async function ViwsOllOrder() {
   return (
     <div>
       {
-        allOrders.map((item:any)=>(<MyOrderCard key={item.id} order={item}></MyOrderCard>))
+        allOrders.map((item:any)=>(<OrderCard key={item.id} order={item}></OrderCard>))
       }
     </div>
   )
