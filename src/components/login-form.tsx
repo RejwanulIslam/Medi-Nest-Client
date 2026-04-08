@@ -15,8 +15,8 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "@tanstack/react-form"
 import * as z from "zod";
 import { toast } from "sonner"
-import { authClient } from "@/lib/auth-client"
 import { redirect } from "next/navigation"
+import { authClient } from "@/lib/auth-client"
 const formSchema = z.object({
   email: z.email(),
   password: z.string()
@@ -70,13 +70,23 @@ export function LoginForm({
   // google login
     const handleGooglrLogin = async () => {
       console.log("click")
-    const data = await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "http://localhost:3000"
-    });
+    // const data = await authClient.signIn.social({
+    //   provider: "google",
+    //   // callbackURL: "https://medinest-client-pearl.vercel.app"
+    //   callbackURL: window.location.origin,
+    // });
+    
+  const data = await authClient.signIn.social({
+    provider: "google",
+    callbackURL:"https://medinest-client-pearl.vercel.app"
+  });
+
     console.log(data)
-     redirect("/")
+     if(data?.data){
+      redirect('/')
+     }
   }
+  
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

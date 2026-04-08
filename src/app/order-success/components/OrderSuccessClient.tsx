@@ -361,7 +361,7 @@ export function OrderSuccessClient() {
               {/* ── Buttons ── */}
               <div className="slide-4" style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "1.25rem" }}>
                 <Link
-                  href="/user-dashboard/orders"
+                  href="user-dashboard/myorder"
                   className="btn-primary"
                   style={{
                     display: "flex", alignItems: "center", justifyContent: "center",

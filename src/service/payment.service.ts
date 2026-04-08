@@ -21,7 +21,7 @@ export const paymentService = {
             const cookieStore = await cookies()
 
             const res = await fetch(
-                "http://localhost:5000/api/payment/create-intent",
+                "https://medinext-server.vercel.app/api/payment/create-intent",
                 {
                     method: "POST",
                     headers: {
@@ -29,7 +29,7 @@ export const paymentService = {
                         Cookie: cookieStore.toString()
                     },
                     body: JSON.stringify({
-                        totalAmount,
+                        totalAmount: Number(totalAmount),
                         shippingAddress,
                         phone,
                         name,
@@ -37,8 +37,12 @@ export const paymentService = {
                     }),
                 }
             )
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Backend failed to create intent");
+            }
 
-            const data =await res.json()
+            const data = await res.json()
             return { data: data, error: null, status: 200 }
 
 

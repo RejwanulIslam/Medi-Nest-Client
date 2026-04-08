@@ -151,7 +151,7 @@ const IconArrow = () => (
   const cfg = statusConfig[order.status];
   // deduplicate items by productId for preview
   const uniqueImages = [
-    ...new Map(order.items.map((i) => [i.productId, i.product.image])).values(),
+    ...new Map(order?.items?.map((i) => [i?.productId, i?.product?.image])).values(),
   ].slice(0, 3);
 
   return (
@@ -176,9 +176,9 @@ const IconArrow = () => (
             </div>
           </div>
           <span
-            className={`text-xs font-semibold px-3 py-1 rounded-full ${cfg.className}`}
+            className={`text-xs font-semibold px-3 py-1 rounded-full ${cfg?.className}`}
           >
-            {cfg.label}
+            {cfg?.label}
           </span>
         </div>
 
@@ -201,7 +201,7 @@ const IconArrow = () => (
             ))}
           </div>
           <span className="text-sm text-zinc-500 dark:text-zinc-400 ml-1">
-            {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+            {order?.items?.length} item{order?.items?.length !== 1 ? "s" : ""}
           </span>
         </div>
 
@@ -209,11 +209,11 @@ const IconArrow = () => (
         <div className="space-y-1.5 mb-4">
           <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
             <IconLocation />
-            <span className="text-sm capitalize">{order.shippingAddress}</span>
+            <span className="text-sm capitalize">{order?.shippingAddress}</span>
           </div>
           <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
             <IconClock />
-            <span className="text-sm">{formatDate(order.createdAt)}</span>
+            <span className="text-sm">{formatDate(order?.createdAt)}</span>
           </div>
         </div>
 
@@ -224,7 +224,7 @@ const IconArrow = () => (
               Total Amount
             </p>
             <p className="text-lg font-bold text-zinc-800 dark:text-zinc-100">
-              ৳{order.totalAmount.toFixed(2)}
+              ৳{order?.totalAmount?.toFixed(2)}
             </p>
           </div>
 

@@ -7,7 +7,7 @@ export default async function ViwsOllOrder() {
   return (
     <div>
       {
-        allOrders.map((item:any)=>(<OrderCard key={item.id} order={item}></OrderCard>))
+        allOrders?.map((item:any)=>(<OrderCard key={item.id} order={item}></OrderCard>))
       }
     </div>
   )

@@ -31,12 +31,16 @@ export function MedicineCard({ medCategory, medData }: { medCategory: string[], 
   const [category, setCategory] = useState("")
 
 const manufacturers = Array.from(
-  new Set(medData.map((item: any) => item.manufacturer))
-)
+  new Set(
+    (Array.isArray(medData) ? medData : [])?.map((item: any) => item.manufacturer)
+  )
+);
 
 const categorys = Array.from(
-  new Set(medCategory.map((item: any) => item.categorieName))
-)
+  new Set(
+    (Array.isArray(medCategory) ? medCategory : [])?.map((item: any) => item.categorieName)
+  )
+);
 
 console.log("manufacturer",categorys)
 
@@ -126,7 +130,7 @@ console.log("manufacturer",categorys)
 
       {/* ===== Medicine Grid ===== */}
       <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {data.map((data: any) => (
+        {Array.isArray(data) && data?.map((data: any) => (
           <Card
             key={data.id}
             className="relative mx-auto w-full max-w-sm overflow-hidden transition hover:shadow-lg"

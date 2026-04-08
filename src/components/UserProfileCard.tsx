@@ -39,7 +39,7 @@ export default function UserProfileCard({ user }: { user: User }) {
         console.log(res)
         setLoading(false)
 
-        if (res.ok) {
+        if (res) {
             toast("User updated successfully")
             setEditMode(false)
         } else {
