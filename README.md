@@ -22,9 +22,9 @@
 - **Deployment:** Vercel
 
 ## 🔑 Access Credentials
-- **Admin:** `admin@email.com` | `Password: (Your Password)`
-- **Seller:** `seler@email.com` | `Password: (Your Password)`
-- **User:** `user@email.com` | `Password: (Your Password)`
+- **Admin:** `admin@email.com` | `Password: (12345678)`
+- **Seller:** `seler@email.com` | `Password: (12345678)`
+- **User:** `user@email.com` | `Password: (12345678)`
 
 ## 🚀 Local Setup
 1. Clone the repo: `git clone https://github.com/RejwanulIslam/Medi-Nest-Client`
