@@ -92,32 +92,32 @@ export const userService = {
     },
 
 
-    manageProfile: async function (Profildata: any, id: string) {
-        const cookieStore = await cookies()
+  manageProfile: async function (Profildata: any, id: string) {
+  const cookieStore = await cookies()
 
-        try {
-            const res = await fetch(`${API_URL}/api/user/${id}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
+  try {
+    const res = await fetch(`${API_URL}/api/user/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookieStore.getAll()
+          .map((c) => `${c.name}=${c.value}`)
+          .join("; "),
+      },
+      body: JSON.stringify(Profildata),
+      cache: "no-store",
+    })
 
-                    Cookie: cookieStore.toString()
-                },
+    const data = await res.json()
 
-                body: JSON.stringify(Profildata),
+    if (!res.ok) {
+      return { data: null, error: { message: data?.message ?? "Update failed" } }
+    }
 
+    return { data: data, error: null }
 
-                cache: "no-store"
-            },
-
-            )
-
-            const data = await res.json()
-
-            return { data: data, error: null }
-
-        } catch (error: any) {
-            return { date: null, error: { message: error.message } }
-        }
-    },
+  } catch (error: any) {
+    return { data: null, error: { message: error.message } }
+  }
+},
 }

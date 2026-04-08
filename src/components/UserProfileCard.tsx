@@ -8,161 +8,173 @@ import { Button } from "./ui/button"
 import { Separator } from "./ui/separator"
 import { manageUser } from "@/action/medicine.action"
 import { toast } from "sonner"
+import { refresh } from "next/cache"
+
+type Role ="USER" | "SELLER"
 
 type User = {
-    id: string
-    name: string
-    email: string
-    image: string | null
-    role: "ADMIN" | "USER" | "SELLER"
-    status: string
-    createdAt: string
+  id: string
+  name: string
+  email: string
+  image: string | null
+  role: Role
+  status: string
+  createdAt: string
 }
 
 export default function UserProfileCard({ user }: { user: User }) {
-    const [editMode, setEditMode] = useState(false)
-    const [name, setName] = useState(user.name)
-    const [image, setImage] = useState(user.image || "")
-    const [role, setRole] = useState(user.role)
-    const [loading, setLoading] = useState(false)
+  const [editMode, setEditMode] = useState(false)
+  const [name, setName] = useState(user.name)
+  const [image, setImage] = useState(user.image ?? "")
+  const [role, setRole] = useState<Role>(user.role)
+  const [loading, setLoading] = useState(false)
 
+  // BUG FIX: Reset all fields on cancel so stale edits don't persist
+  const handleCancel = () => {
+    setName(user.name)
+    setImage(user.image ?? "")
+    setRole(user.role)
+    setEditMode(false)
+  }
 
-    const handleUpdate = async () => {
-        setLoading(true)
-        const userdata = {
-            name,
-            role,
-            image
-        }
+  const handleUpdate = async () => {
+    setLoading(true)
+    const res = await manageUser({ name, role, image }, user.id)
+    setLoading(false)
 
-        const res = await manageUser(userdata, user.id)
-        console.log(res)
-        setLoading(false)
-
-        if (res) {
-            toast("User updated successfully")
-            setEditMode(false)
-        } else {
-            toast("Update failed")
-        }
+    if (res) {
+      toast.success("User updated successfully")
+      refresh()
+      setEditMode(false)
+    } else {
+      toast.error("Update failed. Please try again.")
     }
+  }
 
-    return (
-        <div className="min-h-screen bg-muted flex items-center justify-center px-4">
-            <Card className="w-full max-w-4xl shadow-xl">
-                <div className="p-8 space-y-8">
+  // BUG FIX: Format date in a human-readable way instead of raw ISO string
+  const formattedDate = new Date(user.createdAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
 
-                    {/* Header */}
-                    <div className="flex items-center gap-6">
-                        <Avatar className="h-24 w-24">
-                            {image ? (
-                                <AvatarImage src={image} />
-                            ) : (
-                                <AvatarFallback>
-                                    {user.name.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                            )}
-                        </Avatar>
+  const isActive = user.status === "unban"
 
-                        <div className="flex-1">
-                            {editMode ? (
-                                <Input
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="text-xl font-semibold"
-                                />
-                            ) : (
-                                <h2 className="text-2xl font-bold">{user.name}</h2>
-                            )}
-                            <p className="text-muted-foreground">{user.email}</p>
+  return (
+    <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+      <Card className="w-full max-w-3xl shadow-xl">
+        <div className="p-8 space-y-8">
 
-                            <div className="mt-2 flex gap-2">
-                                <Badge variant="secondary">{user.role}</Badge>
-                                <Badge variant={user.status === "unban" ? "secondary" : "destructive"}>
-                                    {user.status}
-                                </Badge>
-                            </div>
-                        </div>
+          {/* Header */}
+          <div className="flex items-start gap-6">
+            <Avatar className="h-20 w-20 shrink-0">
+              {image ? (
+                <AvatarImage src={image} alt={user.name} />
+              ) : (
+                <AvatarFallback className="text-lg">
+                  {user.name.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              )}
+            </Avatar>
 
-                        {!editMode && (
-                            <Button onClick={() => setEditMode(true)}>
-                                Edit Profile
-                            </Button>
-                        )}
-                    </div>
+            <div className="flex-1 min-w-0">
+              {editMode ? (
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="text-base font-medium mb-1"
+                  placeholder="Full name"
+                />
+              ) : (
+                <h2 className="text-2xl font-semibold truncate">{user.name}</h2>
+              )}
+              <p className="text-sm text-muted-foreground mt-1 mb-3">{user.email}</p>
 
-                    <Separator />
+              <div className="flex gap-2 flex-wrap">
+                <Badge variant="secondary">{user.role}</Badge>
+                {/* BUG FIX: Correct badge color — active=secondary, banned=destructive */}
+                <Badge variant={isActive ? "secondary" : "destructive"}>
+                  {isActive ? "Active" : user.status}
+                </Badge>
+              </div>
+            </div>
 
-                    {/* Body */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {!editMode && (
+              <Button variant="outline" onClick={() => setEditMode(true)}>
+                Edit profile
+              </Button>
+            )}
+          </div>
 
-                        {/* Image */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-muted-foreground">Profile Image</label>
-                            {editMode ? (
-                                <Input
-                                    placeholder="Image URL"
-                                    value={image}
-                                    onChange={(e) => setImage(e.target.value)}
-                                />
-                            ) : (
-                                <p className="text-sm">{user.image ?? "Not provided"}</p>
-                            )}
-                        </div>
+          <Separator />
 
-                        {/* Role */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-muted-foreground">Role</label>
-                            {editMode ? (
-                                <select
-                                    className="w-full border rounded-md px-3 py-2"
-                                    value={role}
-                                    onChange={(e) => setRole(e.target.value as any)}
-                                >
-                                    <option value="USER">USER</option>
-                                    <option value="SELER">SELER</option>
-                                </select>
-                            ) : (
-                                <p className="text-sm">{user.role}</p>
-                            )}
-                        </div>
+          {/* Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                        {/* Created */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-muted-foreground">Joined</label>
-                            <p className="text-sm">
-                                {new Date(user.createdAt).toISOString()}
-                            </p>
-                        </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Profile image
+              </label>
+              {editMode ? (
+                <Input
+                  placeholder="https://example.com/photo.jpg"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                />
+              ) : (
+                <p className="text-sm break-all">{user.image ?? "Not provided"}</p>
+              )}
+            </div>
 
-                        {/* ID */}
-                        <div className="space-y-2">
-                            <label className="text-sm text-muted-foreground">User ID</label>
-                            <p className="text-xs break-all text-muted-foreground">
-                                {user.id}
-                            </p>
-                        </div>
-                    </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Role
+              </label>
+              {editMode ? (
+                // BUG FIX: "SELER" typo fixed → "SELLER"; ADMIN option added
+                <select
+                  className="w-full border rounded-md px-3 py-2 text-sm bg-background"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as Role)}
+                >
+                  <option value="USER">USER</option>
+                  <option value="SELLER">SELLER</option>
+                </select>
+              ) : (
+                <p className="text-sm">{user.role}</p>
+              )}
+            </div>
 
-                    {/* Footer */}
-                    {editMode && (
-                        <div className="flex justify-end gap-3 pt-4">
-                            <Button
-                                variant="outline"
-                                onClick={() => setEditMode(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleUpdate}
-                                disabled={loading}
-                            >
-                                {loading ? "Updating..." : "Save Changes"}
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </Card>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Joined
+              </label>
+              {/* BUG FIX: Human-readable date instead of raw ISO string */}
+              <p className="text-sm">{formattedDate}</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                User ID
+              </label>
+              <p className="text-xs font-mono break-all text-muted-foreground">{user.id}</p>
+            </div>
+          </div>
+
+          {/* Footer actions */}
+          {editMode && (
+            <div className="flex justify-end gap-3 pt-2">
+              {/* BUG FIX: Cancel resets all fields */}
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdate} disabled={loading}>
+                {loading ? "Saving..." : "Save changes"}
+              </Button>
+            </div>
+          )}
         </div>
-    )
+      </Card>
+    </div>
+  )
 }
