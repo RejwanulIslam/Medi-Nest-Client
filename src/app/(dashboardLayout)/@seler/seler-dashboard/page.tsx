@@ -1,30 +1,25 @@
-import React from "react"
+import { getAllOrder } from "@/action/medicine.action"
+import SellerDashboardClient from "@/components/wellcomeComponent/Sellerdashboardclient"
+import { medicineService } from "@/service/medicine.service"
+import { userService } from "@/service/user.service"
 
-export default function SelerDashboard() {
-  return (
-    <div className="min-h-[70vh] flex items-center justify-center bg-gradient-to-br from-emerald-50 to-teal-100 px-4">
-      <div className="max-w-xl w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-        {/* Icon */}
-        <div className="text-5xl mb-4">🏪</div>
+export default async function SellerDashboardPage() {
+  // Replace with real server-side data fetching
+    const {data}= await medicineService.getMedicine()
+      
+        const {data:seation}=await userService.getSeation()
+        const filterByselerId=data.filter((item:any)=>item.sellerId==seation.user.id)
 
-        {/* Welcome Text */}
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-          Welcome to Your Seller Dashboard
-        </h1>
+     const allOrders= await getAllOrder()
+      const myOrders=allOrders.filter((item:any)=>item.product.sellerId===seation.user.id)
+  const stats = {
+    totalProducts: filterByselerId.length,
+    totalOrders: myOrders.length,
+    totalRevenue: 42800,
+    pendingOrders: 7,
+    deliveredOrders: 115,
+    averageRating: 4.7,
+  }
 
-        <p className="mt-3 text-gray-600 text-sm md:text-base">
-          Manage your products, track orders, and grow your business—all from
-          one place. You're in control of everything that matters to your store.
-        </p>
-
-        {/* Divider */}
-        <div className="my-6 h-px bg-gray-200" />
-
-        {/* Motivation line */}
-        <p className="text-sm font-medium text-emerald-600">
-          Let’s start selling and growing your business 🚀
-        </p>
-      </div>
-    </div>
-  )
+  return <SellerDashboardClient stats={stats} />
 }

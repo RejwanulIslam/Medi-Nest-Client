@@ -1,14 +1,8 @@
 import { getAllOrder } from '@/action/medicine.action'
-import OrderCard from '@/components/order/MyOrderCard'
+import AllOrdersClient from './component/AllOrdersClient'
 
-export default async function ViwsOllOrder() {
-  const allOrders= await getAllOrder()
-  console.log(allOrders)
-  return (
-    <div>
-      {
-        allOrders?.map((item:any)=>(<OrderCard key={item.id} order={item}></OrderCard>))
-      }
-    </div>
-  )
+export default async function AllOrdersPage() {
+  const allOrders = await getAllOrder()
+console.log(allOrders)
+  return <AllOrdersClient allOrders={allOrders ?? []} />
 }
