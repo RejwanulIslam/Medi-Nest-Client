@@ -1,6 +1,6 @@
 "use client";
 
-import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import {Menu} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -63,8 +63,8 @@ interface Navbar1Props {
 
 const Navbar1 = ({
   logo = {
-    url: "https://www.shadcnblocks.com",
-    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
+    url: "/",
+    src: "./medinestlogo.png",
     alt: "logo",
     title: "Medi Nest",
   },
@@ -117,7 +117,6 @@ const Navbar1 = ({
   const logOut = async () => {
     await authClient.signOut()
     setSeation(null)
-    console.log("dksdkfjekfjefjekfjekfjejfefjek")
   }
 
   if (!mounted) return null;
@@ -138,7 +137,7 @@ const Navbar1 = ({
             <a href={logo.url} className="flex items-center gap-2">
               <img
                 src={logo.src}
-                className="max-h-8 dark:invert"
+                className="max-h-8 rounded-full dark:invert"
                 alt={logo.alt}
               />
               <span className="text-lg font-semibold tracking-tighter">

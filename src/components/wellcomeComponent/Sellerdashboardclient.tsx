@@ -6,7 +6,6 @@ interface SellerStats {
   totalRevenue: number
   pendingOrders: number
   deliveredOrders: number
-  averageRating: number
 }
 
 const recentOrders = [
@@ -17,10 +16,10 @@ const recentOrders = [
 ]
 
 const quickLinks = [
-  { label: 'Add Product', icon: '➕', href: '/seller/products/new', from: 'from-emerald-500', to: 'to-teal-500' },
-  { label: 'My Products', icon: '💊', href: '/seller/products', from: 'from-blue-500', to: 'to-cyan-500' },
-  { label: 'My Orders', icon: '📦', href: '/seller/orders', from: 'from-amber-500', to: 'to-orange-400' },
-  { label: 'Earnings', icon: '💵', href: '/seller/earnings', from: 'from-rose-500', to: 'to-pink-500' },
+  { label: 'Add Product', icon: '➕', href: '/seler-dashboard/add-medicine', from: 'from-emerald-500', to: 'to-teal-500' },
+  { label: 'My Products', icon: '💊', href: '/seler-dashboard/manage-medicine', from: 'from-blue-500', to: 'to-cyan-500' },
+  { label: 'My Orders', icon: '📦', href: '/seler-dashboard/viwsorder', from: 'from-amber-500', to: 'to-orange-400' },
+  { label: 'Earnings', icon: '💵', href: '/seler-dashboard/upcomeingFetere', from: 'from-rose-500', to: 'to-pink-500' },
 ]
 
 function StatCard({ label, value, icon, accent, sub }: {
@@ -59,11 +58,7 @@ export default function SellerDashboardClient({ stats }: { stats: SellerStats })
               <p className="text-slate-400 text-sm mt-2">Manage your products, track orders, and grow your sales.</p>
             </div>
             <div className="flex items-center gap-3">
-              {/* Rating badge */}
-              <div className="bg-white/10 dark:bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-center">
-                <p className="text-2xl font-black text-white">⭐ {stats.averageRating}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-widest">Avg. Rating</p>
-              </div>
+             
             </div>
           </div>
         </div>

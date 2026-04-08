@@ -1,9 +1,4 @@
-import { Star } from "lucide-react";
-import React from "react";
 
-import { cn } from "@/lib/utils";
-
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 interface Hero7Props {
@@ -11,7 +6,7 @@ interface Hero7Props {
   description?: string;
   button?: {
     text: string;
-    // url: string;
+    url: string;
     className?: string;
   };
   reviews?: {
@@ -30,7 +25,7 @@ const Hero7 = ({
   description = "Finely crafted components built with React, Tailwind and Shadcn UI. Developers can copy and paste these blocks directly into their project.",
   button = {
     text: "Discover all Catagory",
-    // url: "https://www.shadcnblocks.com",
+    url: "https://medinest-client-pearl.vercel.app/allmedicine"
   },
 
   className,
@@ -45,8 +40,7 @@ const Hero7 = ({
           </p>
         </div>
         <Button asChild size="lg" className="mt-10">
-          {/* <a href={button.url}>{button.text}</a> */}
-          <a>{button.text}</a>
+          <a href={button.url}>{button.text}</a>
         </Button>
      
       </div>
@@ -54,4 +48,4 @@ const Hero7 = ({
   );
 };
 
-export { Hero7 };
+export default Hero7 ;
