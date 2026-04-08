@@ -9,6 +9,7 @@ import { Separator } from "./ui/separator"
 import { manageUser } from "@/action/medicine.action"
 import { toast } from "sonner"
 import { refresh } from "next/cache"
+import { useRouter } from "next/navigation"
 
 type Role ="USER" | "SELLER"
 
@@ -28,7 +29,7 @@ export default function UserProfileCard({ user }: { user: User }) {
   const [image, setImage] = useState(user.image ?? "")
   const [role, setRole] = useState<Role>(user.role)
   const [loading, setLoading] = useState(false)
-
+ const router = useRouter()
   // BUG FIX: Reset all fields on cancel so stale edits don't persist
   const handleCancel = () => {
     setName(user.name)
@@ -44,8 +45,9 @@ export default function UserProfileCard({ user }: { user: User }) {
 
     if (res) {
       toast.success("User updated successfully")
-      refresh()
+          
       setEditMode(false)
+      router.refresh()
     } else {
       toast.error("Update failed. Please try again.")
     }
