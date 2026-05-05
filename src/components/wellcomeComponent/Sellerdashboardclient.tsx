@@ -1,112 +1,156 @@
 'use client'
+import { motion } from "framer-motion"
+import { Store, PlusCircle, Package, ListOrdered, BadgeDollarSign, Activity, CheckCircle, Clock } from "lucide-react"
 
 interface SellerStats {
   totalProducts: number
   totalOrders: number
   totalRevenue: number
   pendingOrders: number
-  deliveredOrders: number
 }
 
-const recentOrders = [
-  { id: '#ORD-881', product: 'PainKiller 500mg', qty: 2, amount: 60, status: 'Delivered', statusColor: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50' },
-  { id: '#ORD-879', product: 'Amoxicillin', qty: 1, amount: 120, status: 'Pending', statusColor: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50' },
-  { id: '#ORD-876', product: 'Vitamin C', qty: 3, amount: 90, status: 'Shipped', statusColor: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50' },
-  { id: '#ORD-871', product: 'PainKiller 500mg', qty: 1, amount: 30, status: 'Delivered', statusColor: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50' },
-]
-
 const quickLinks = [
-  { label: 'Add Product', icon: '➕', href: '/seler-dashboard/add-medicine', from: 'from-emerald-500', to: 'to-teal-500' },
-  { label: 'My Products', icon: '💊', href: '/seler-dashboard/manage-medicine', from: 'from-blue-500', to: 'to-cyan-500' },
-  { label: 'My Orders', icon: '📦', href: '/seler-dashboard/viwsorder', from: 'from-amber-500', to: 'to-orange-400' },
-  { label: 'Earnings', icon: '💵', href: '/seler-dashboard/upcomeingFetere', from: 'from-rose-500', to: 'to-pink-500' },
+  { label: 'Add Medicine', icon: PlusCircle, href: '/seler-dashboard/add-medicine', from: 'from-emerald-500', to: 'to-teal-500' },
+  { label: 'My Medicines', icon: Package, href: '/seler-dashboard/my-medicine', from: 'from-blue-500', to: 'to-cyan-500' },
+  { label: 'Manage Orders', icon: ListOrdered, href: '/seler-dashboard/my-order', from: 'from-violet-500', to: 'to-purple-600' },
+  { label: 'Shop Profile', icon: Store, href: '/seler-dashboard/upcomeingFetere', from: 'from-amber-500', to: 'to-orange-400' },
 ]
 
-function StatCard({ label, value, icon, accent, sub }: {
-  label: string; value: string | number; icon: string; accent: string; sub?: string
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+}
+
+function StatCard({ label, value, Icon, accent, sub }: {
+  label: string; value: string | number; Icon: any; accent: string; sub?: string
 }) {
   return (
-    <div className="relative bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden">
-      <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accent}`} />
-      <span className="text-2xl">{icon}</span>
-      <p className="text-2xl font-black text-slate-900 dark:text-white mt-3">{value}</p>
-      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">{label}</p>
-      {sub && <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{sub}</p>}
-    </div>
+    <motion.div
+      variants={itemVariants as any}
+      className="relative bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group"
+    >
+      <div className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${accent}`} />
+
+      {/* Background glow on hover */}
+      <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full bg-gradient-to-br ${accent} opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-500`} />
+
+      <div className="flex items-start justify-between mb-4 relative z-10">
+        <div className={`p-3 rounded-2xl bg-gradient-to-br ${accent} text-white shadow-md`}>
+          <Icon className="w-6 h-6" />
+        </div>
+        <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400`}>
+          Live
+        </span>
+      </div>
+      <p className="text-3xl font-black text-slate-900 dark:text-white relative z-10">{value}</p>
+      <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1 relative z-10">{label}</p>
+      {sub && <p className="text-xs text-emerald-500 font-medium mt-1.5 relative z-10 flex items-center gap-1"><Activity className="w-3 h-3" /> {sub}</p>}
+    </motion.div>
   )
 }
 
 export default function SellerDashboardClient({ stats }: { stats: SellerStats }) {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 transition-colors duration-300 pb-12">
 
       {/* ── Hero ── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-teal-900 to-zinc-900 dark:from-zinc-950 dark:via-emerald-950/60 dark:to-zinc-950 border-b border-emerald-900/50 dark:border-zinc-800">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-teal-400/10 blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden bg-white dark:bg-slate-900 border-b border-slate-200/60 dark:border-slate-800 shadow-sm mb-8">
+        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 left-1/4 w-72 h-72 rounded-full bg-teal-400/5 blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-10">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-semibold px-3 py-1.5 rounded-full mb-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Seller Dashboard
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="inline-flex items-center gap-2 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-300 text-xs font-bold px-3 py-1.5 rounded-full mb-4 shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                Seller Portal
               </div>
-              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">Seller</span> 🏪
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+                Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400">Seller</span> 👋
               </h1>
-              <p className="text-slate-400 text-sm mt-2">Manage your products, track orders, and grow your sales.</p>
-            </div>
-            <div className="flex items-center gap-3">
-             
-            </div>
+              <p className="text-slate-500 dark:text-slate-400 text-base">Manage your inventory, track orders, and boost your sales.</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="w-16 h-16 rounded-[2rem] bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white shadow-xl shadow-emerald-500/20 flex-shrink-0">
+                <Store className="w-8 h-8" />
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
         {/* ── Stats ── */}
         <section>
-          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Your Store Overview</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            <StatCard label="Products" value={stats.totalProducts} icon="💊" accent="from-blue-500 to-cyan-500" />
-            <StatCard label="Total Orders" value={stats.totalOrders} icon="📦" accent="from-amber-500 to-orange-400" />
-            <StatCard label="Revenue" value={`৳${stats.totalRevenue.toLocaleString()}`} icon="💵" accent="from-emerald-500 to-teal-500" />
-            <StatCard label="Pending" value={stats.pendingOrders} icon="⏳" sub="Needs shipping" accent="from-rose-500 to-pink-500" />
-            <StatCard label="Delivered" value={stats.deliveredOrders} icon="✅" accent="from-violet-500 to-purple-600" />
-          </div>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-6 flex items-center gap-2">
+            <Activity className="w-4 h-4" /> Store Overview
+          </h2>
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          >
+            <StatCard label="Total Products" value={stats.totalProducts} Icon={Package} accent="from-blue-500 to-cyan-500" />
+            <StatCard label="Total Orders" value={stats.totalOrders} Icon={CheckCircle} accent="from-violet-500 to-purple-600" />
+            <StatCard label="Pending Orders" value={stats.pendingOrders} Icon={Clock} sub="Action required" accent="from-amber-500 to-orange-400" />
+            <StatCard label="Total Revenue" value={`৳${stats.totalRevenue.toLocaleString()}`} Icon={BadgeDollarSign} accent="from-emerald-500 to-teal-500" />
+          </motion.div>
         </section>
 
-        {/* ── Quick Links + Orders ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* ── Quick Links ── */}
+        <section>
+          <h2 className="text-sm font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-6 flex items-center gap-2">
+            <Store className="w-4 h-4" /> Quick Actions
+          </h2>
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            {quickLinks.map((link) => (
+              <motion.a
+                variants={itemVariants as any}
+                key={link.label}
+                href={link.href}
+                className="group flex flex-col items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-3xl p-6 hover:shadow-xl hover:border-emerald-500/30 transition-all duration-300"
+              >
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${link.from} ${link.to} flex items-center justify-center text-white shadow-lg group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300`}>
+                  <link.icon className="w-6 h-6" />
+                </div>
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-300 text-center leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">{link.label}</span>
+              </motion.a>
+            ))}
+          </motion.div>
+        </section>
 
-          {/* Quick Links */}
-          <section className="lg:col-span-6">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {quickLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="group flex flex-col items-center justify-center gap-2 bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-2xl p-5 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${link.from} ${link.to} flex items-center justify-center text-xl shadow-md group-hover:scale-110 transition-transform duration-200`}>
-                    {link.icon}
-                  </div>
-                  <span className="text-xs font-semibold text-slate-700 dark:text-slate-300 text-center leading-tight">{link.label}</span>
-                </a>
-              ))}
-            </div>
-          </section>
-
-          {/* Recent Orders Table */}
-         
-        </div>
-
-        <p className="text-center text-[11px] text-slate-400 dark:text-slate-600 pb-4">
-          Seller Portal · All rights reserved © {new Date().getFullYear()}
-        </p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="text-center text-sm font-medium text-slate-400 dark:text-slate-500 pt-8"
+        >
+          Seller Portal · Partner with us © {new Date().getFullYear()}
+        </motion.p>
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/them-provider";
 import { Toaster } from "sonner";
+import AIChatbot from "@/components/ai/AIChatbot";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,11 +37,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
 
-      
 
-        {children}
-        <Toaster></Toaster>
-          </ThemeProvider>
+
+          {children}
+          <AIChatbot context="MediNest medical e-commerce platform" />
+          <Toaster></Toaster>
+        </ThemeProvider>
       </body>
     </html>
   );

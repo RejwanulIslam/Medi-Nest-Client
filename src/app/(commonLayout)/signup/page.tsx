@@ -1,11 +1,16 @@
-import { SignupForm } from "@/components/signup-form"
+import AuthPageLayout from "@/components/auth-page-layout";
+import { SignupForm } from "@/components/signup-form";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Create Account | MediNest",
+  description: "Create your MediNest account and start exploring trusted medicines.",
+};
 
 export default function SignupPage() {
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm md:max-w-4xl">
-        <SignupForm />
-      </div>
-    </div>
-  )
+    <AuthPageLayout>
+      <SignupForm />
+    </AuthPageLayout>
+  );
 }

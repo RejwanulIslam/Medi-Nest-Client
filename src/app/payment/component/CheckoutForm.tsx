@@ -87,14 +87,13 @@ export function CheckoutForm({
       items: items.map((item: any) => ({
         productId: item.productId,
         quantity: item.quantity,
+        price: item.price,
       })),
     })
 
-    // 2) Delete cart items
-    //    cartItemId টা Addcard.tsx থেকে items এ পাঠানো হয়েছে
     const idsToDelete: string[] = items
       .map((item: any) => item.cartItemId)
-      .filter(Boolean) // undefined/null বাদ দেয়
+      .filter(Boolean)
 
     if (idsToDelete.length > 0) {
       await deleteCard(idsToDelete)

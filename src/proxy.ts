@@ -4,12 +4,11 @@ import { userRole } from "@/constrans/userRole";
 
 // Example of default export
 export default async function proxy(request: NextRequest) {
-console.log("pathname")
-  const pathname = request.nextUrl.pathname;
-console.log("pathname",pathname)
+    console.log("pathname")
+    const pathname = request.nextUrl.pathname;
+    console.log("pathname", pathname)
 
     const { data: seation } = await userService.getSeation()
-    console.log("jdsjfejfejfhejhf",seation)
 
     let isAuthenticated = false
     let isAdmin = false
@@ -44,18 +43,21 @@ console.log("pathname",pathname)
         return NextResponse.redirect(new URL("/user-dashboard", request.url))
     }
 
-    
-    if (!isAdmin && !isUser && pathname.startsWith("/admin-dashboard")) {
-        return NextResponse.redirect(new URL("/seler-dashboard", request.url))
+
+    if (isSeler) {
+        if (pathname.startsWith("/admin-dashboard")) {
+            return NextResponse.redirect(new URL("/seler-dashboard", request.url));
+        }
+        if (pathname.startsWith("/user-dashboard")) {
+            return NextResponse.redirect(new URL("/seler-dashboard", request.url));
+        }
+        return NextResponse.next();
     }
-    if (!isAdmin && !isUser && pathname.startsWith("/user-dashboard")) {
-        return NextResponse.redirect(new URL("/seler-dashboard", request.url))
-    }
-   
 
 
 
-     return NextResponse.next();
+
+    return NextResponse.next();
 }
 
 export const config = {
@@ -66,8 +68,8 @@ export const config = {
         "/admin-dashboard/:path*",
         "/seler-dashboard",
         "/seler-dashboard/:path*",
-    
-       
+
+
     ]
 }
 

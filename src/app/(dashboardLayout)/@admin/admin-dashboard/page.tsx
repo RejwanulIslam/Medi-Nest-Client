@@ -5,17 +5,17 @@ import { userService } from "@/service/user.service"
 
 export default async function AdminDashboardPage() {
   // Replace with real server-side data fetching
-    const res = await userService.getAlluser()
-    const {data} = await userService.getAlluser()
-    console.log(data)
- const seler=data.filter((data:any)=>data?.role=="SELER")
- const allOrders = await getAllOrder()
-       const totalRevenue= allOrders.reduce((sum:any, g:any) => sum + g.order.totalAmount, 0)
-      const  pendingOrders=allOrders.filter((order:any)=>order.order.status=="Pending") 
-          const { data: medData } = await medicineService.getMedicine()
-      
+  const res = await userService.getAlluser()
+  const { data } = await userService.getAlluser()
+  console.log(data)
+  const seler = data.filter((data: any) => data?.role == "SELLER")
+  const allOrders = await getAllOrder()
+  const totalRevenue = allOrders.reduce((sum: any, g: any) => sum + g?.order?.totalAmount, 0)
+  const pendingOrders = allOrders.filter((order: any) => order?.order?.status == "Pending")
+  const { data: medData } = await medicineService.getMedicine()
 
-  console.log("allOrders",allOrders)
+
+  console.log("allOrders", allOrders)
   const stats = {
     totalUsers: res?.data?.length,
     totalSellers: seler.length,

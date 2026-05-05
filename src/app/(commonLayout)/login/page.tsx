@@ -1,11 +1,16 @@
-import { LoginForm } from "@/components/login-form"
+import AuthPageLayout from "@/components/auth-page-layout";
+import { LoginForm } from "@/components/login-form";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign In | MediNest",
+  description: "Sign in to your MediNest account to access your medicines and orders.",
+};
 
 export default function LoginPage() {
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm md:max-w-4xl">
-        <LoginForm />
-      </div>
-    </div>
-  )
+    <AuthPageLayout>
+      <LoginForm />
+    </AuthPageLayout>
+  );
 }

@@ -1,85 +1,66 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-    SidebarInset,
-    SidebarProvider,
-    SidebarTrigger,
-} from "@/components/ui/sidebar"
-import { userService } from "@/service/user.service"
-import React, { Children, use } from "react"
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
+import { userService } from "@/service/user.service";
+import { userRole } from "@/constrans/userRole";
+import { adminRoutes } from "@/routes/adminRoutes";
+import { userRoutes } from "@/routes/userRoutes";
+import { selerRoutes } from "@/routes/selerRoutes";
+import { Route } from "@/types";
+import React from "react";
 
+export const dynamic = "force-dynamic";
 
-export const dynamic = 'force-dynamic';
-export default async function DashboardLayout({ user, seler, admin }: { user: React.ReactNode, seler: React.ReactNode, admin: React.ReactNode }) {
-    const res = await userService.getSeation()
-   
-    const userInfo = res?.data?.user
- console.log('res', res)
-    let mainContent: React.ReactNode = null;
-    let pageTitle: string = "";
+export default async function DashboardLayout({
+  user,
+  seler,
+  admin,
+}: {
+  user: React.ReactNode;
+  seler: React.ReactNode;
+  admin: React.ReactNode;
+}) {
+  const res = await userService.getSeation();
+  const userInfo = res?.data?.user;
 
-    switch (userInfo?.role) {
-        case "USER":
-            mainContent = user;
-            pageTitle = "User Dashboard";
-            break;
-        case "SELER":
-            mainContent = seler;
-            pageTitle = "Seler Dashboard";
-            break;
-        case "ADMIN":
-            mainContent = admin;
-            pageTitle = "Admin Dashboard";
-            break;
-        default:
-            mainContent = user;
-            pageTitle = "Dashboard";
-    }
+  // ── Resolve content, title, and routes based on role ──
+  let mainContent: React.ReactNode = user;
+  let pageTitle = "Dashboard";
+  let routes: Route[] = userRoutes;
 
+  switch (userInfo?.role) {
+    case userRole.user:
+      mainContent = user;
+      pageTitle = "User Dashboard";
+      routes = userRoutes;
+      break;
+    case userRole.seler:
+      mainContent = seler;
+      pageTitle = "Seller Dashboard";
+      routes = selerRoutes;
+      break;
+    case userRole.admin:
+      mainContent = admin;
+      pageTitle = "Admin Dashboard";
+      routes = adminRoutes;
+      break;
+    default:
+      mainContent = user;
+      pageTitle = "Dashboard";
+      routes = userRoutes;
+  }
 
-    return (
-        <SidebarProvider>
-            <AppSidebar user={userInfo} />
-            <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-                    <SidebarTrigger className="-ml-1" />
-                    <Separator
-                        orientation="vertical"
-                        className="mr-2 data-[orientation=vertical]:h-4"
-                    />
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem className="hidden md:block">
-                                <BreadcrumbLink href="#">
-                                    Building Your Application
-                                </BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator className="hidden md:block" />
-                            <BreadcrumbItem>
-                                <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
+  // Safe-to-pass user object (only serialisable fields)
+  const safeUser = userInfo
+    ? {
+        name: userInfo.name ?? undefined,
+        email: userInfo.email ?? undefined,
+        image: userInfo.image ?? undefined,
+        role: userInfo.role ?? undefined,
+      }
+    : null;
 
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
-                    </Breadcrumb>
-                </header>
-                <div className="flex flex-1 flex-col gap-4 p-4">
-                    <div>
-
-                        {mainContent}
-
-                    </div>
-                </div>
-            </SidebarInset>
-        </SidebarProvider>
-
-
-    )
+  return (
+    <DashboardShell routes={routes} user={safeUser} pageTitle={pageTitle}>
+      {mainContent}
+    </DashboardShell>
+  );
 }

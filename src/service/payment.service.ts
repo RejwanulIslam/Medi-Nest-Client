@@ -21,7 +21,7 @@ export const paymentService = {
             const cookieStore = await cookies()
 
             const res = await fetch(
-                "https://medinext-server.vercel.app/api/payment/create-intent",
+                "https://medi-nest-server-beta.vercel.app/api/payment/create-intent",
                 {
                     method: "POST",
                     headers: {

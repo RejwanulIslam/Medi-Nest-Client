@@ -1,11 +1,9 @@
-// app/payment/page.tsx
-// ✅ এটা SERVER COMPONENT — "use client" নেই
+
 
 import { Suspense } from "react"
 import { OrderItem } from "./payment.interface"
 import { PaymentPageClient } from "./component/Paymentpageclient"
 
-// Next.js 15 এ searchParams এখন Promise
 interface PaymentPageProps {
   searchParams: Promise<{
     totalAmount?: string

@@ -1,67 +1,60 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { crateOrder, deleteCard } from "@/action/medicine.action"
+import { motion, AnimatePresence } from "framer-motion"
 import {
   Truck,
   CreditCard,
-  ShoppingBag,
+  ShoppingCart,
   MapPin,
   Phone,
   User,
   ChevronRight,
   Package,
   CheckCircle2,
-  Sun,
-  Moon,
+  Trash2,
+  AlertCircle,
+  Loader2,
+  ShoppingBag,
+  X,
 } from "lucide-react"
+import { crateOrder, deleteCard } from "@/action/medicine.action"
+import { cn } from "@/lib/utils"
 
 type PaymentMethod = "cod" | "stripe" | null
 
+const inputCls = cn(
+  "w-full h-10 pl-10 pr-3.5 rounded-xl text-sm outline-none transition-all duration-200",
+  "bg-slate-50 dark:bg-slate-900/60",
+  "border border-slate-200 dark:border-white/10",
+  "text-slate-900 dark:text-slate-100",
+  "placeholder-slate-400 dark:placeholder-slate-500",
+  "focus:ring-2 focus:ring-emerald-400/40 focus:border-emerald-400 dark:focus:border-emerald-500"
+)
+
 export default function Addcard({ product }: { product: any[] }) {
   const router = useRouter()
-  const [dark, setDark] = useState(false)
   const [open, setOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null)
   const [shippingAddress, setShippingAddress] = useState("")
   const [phone, setPhone] = useState("")
   const [name, setName] = useState("")
   const [loading, setLoading] = useState(false)
-
-  // Sync dark class on <html> for Tailwind dark mode
-  useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add("dark")
-    } else {
-      document.documentElement.classList.remove("dark")
-    }
-  }, [dark])
+  const [orderError, setOrderError] = useState("")
 
   const totalAmount = product.reduce((total, item) => {
-    const price = item.product?.price || 0
-    const quantity = item.quantity || 0
-    return total + price * quantity
+    return total + (item.product?.price || 0) * (item.quantity || 0)
   }, 0)
 
+  const canProceed = shippingAddress.trim() && phone.trim() && name.trim()
+
+  // ── COD Order ──────────────────────────────────────────────────────────────
   const postCodOrder = async () => {
-    if (!shippingAddress || !phone || !name) return
+    if (!canProceed) return
     setLoading(true)
+    setOrderError("")
     try {
+
       const orderData = {
         shippingAddress,
         totalAmount,
@@ -71,20 +64,31 @@ export default function Addcard({ product }: { product: any[] }) {
         items: product.map((item) => ({
           productId: item.product.id,
           quantity: item.quantity,
+          price: item.product.price,
         })),
       }
-      await crateOrder(orderData)
-      const idsToDelete = product.map((item) => item.id)
-      await deleteCard(idsToDelete)
-      setOpen(false)
-      router.push("/order-success")
+      const data = await crateOrder(orderData)
+      console.log("orderdata", orderData);
+      console.log("cod data:", data)
+      // crateOrder returns the saved order object on success, or null on error
+      if (data) {
+        const idsToDelete = product.map((item) => item.id)
+        await deleteCard(idsToDelete)
+        setOpen(false)
+        router.push("/order-success")
+      } else {
+        setOrderError("Failed to place order. Please try again.")
+      }
+    } catch {
+      setOrderError("Something went wrong. Please try again.")
     } finally {
       setLoading(false)
     }
   }
 
+  // ── Go to Stripe ────────────────────────────────────────────────────────────
   const goToStripe = () => {
-    if (!shippingAddress || !phone || !name) return
+    if (!canProceed) return
     const params = new URLSearchParams({
       totalAmount: String(totalAmount),
       shippingAddress,
@@ -92,7 +96,7 @@ export default function Addcard({ product }: { product: any[] }) {
       name,
       items: JSON.stringify(
         product.map((item) => ({
-          cartItemId: item.id,          // ← cart delete এর জন্য
+          cartItemId: item.id,
           productId: item.product.id,
           medicineName: item.product.medicineName,
           price: item.product.price,
@@ -104,278 +108,327 @@ export default function Addcard({ product }: { product: any[] }) {
     router.push(`/payment?${params.toString()}`)
   }
 
-  const canProceed = shippingAddress && phone && name
-  const codActive = paymentMethod === "cod"
-  const stripeActive = paymentMethod === "stripe"
-
   return (
-    <div
-      className={`min-h-screen transition-colors duration-300 p-6
-        ${dark
-          ? "bg-[#0f1117] text-slate-100"
-          : "bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-slate-800"
-        }`}
-    >
-      {/* ─── Topbar ─── */}
-      <div className="max-w-5xl mx-auto mb-8 flex items-center gap-3">
-        <div className="p-2 bg-indigo-600 rounded-xl">
-          <ShoppingBag className="text-white w-5 h-5" />
+    <div className="max-w-5xl mx-auto">
+      {/* ── Page Header ── */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="flex items-center gap-3 mb-6"
+      >
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/25">
+          <ShoppingCart className="w-5 h-5 text-white" strokeWidth={2} />
         </div>
-        <h1 className={`text-2xl font-bold tracking-tight ${dark ? "text-slate-100" : "text-slate-800"}`}>
-          My Cart
-        </h1>
-        <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 font-semibold">
-          {product.length} item{product.length !== 1 && "s"}
-        </Badge>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+            My Cart
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {product.length} item{product.length !== 1 && "s"} ready to order
+          </p>
+        </div>
+      </motion.div>
 
-        {/* ── Theme Toggle ── */}
-        <button
-          onClick={() => setDark(!dark)}
-          aria-label="Toggle theme"
-          className={`ml-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border transition-all duration-200
-            ${dark
-              ? "bg-slate-800 border-slate-600 text-yellow-400 hover:bg-slate-700"
-              : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm"
-            }`}
-        >
-          {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          <span>{dark ? "Light" : "Dark"}</span>
-        </button>
-      </div>
-
-      {/* ─── Product Grid ─── */}
-      <div className="max-w-5xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-        {product.map((item: any) => (
-          <Card
+      {/* ── Product Grid ── */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {product.map((item: any, i) => (
+          <motion.div
             key={item.id}
-            className={`group overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 rounded-2xl border-0
-              ${dark ? "bg-[#1a1d27] border border-slate-700/50" : "bg-white"}`}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: i * 0.06 }}
+            className="group rounded-2xl border border-slate-200/70 dark:border-white/[0.07] bg-white dark:bg-slate-900/50 overflow-hidden hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-black/20 transition-all duration-300"
           >
-            <CardHeader className="p-0 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10" />
+            {/* Image */}
+            <div className="relative h-44 overflow-hidden bg-slate-100 dark:bg-slate-800">
               <img
-                src={item.product.image ?? "https://i.ibb.co/yc1DkDrb/colorful-pills-syringe.jpg"}
-                className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-                alt={item.product.medicineName}
+                src={item.product?.image ?? "https://i.ibb.co/yc1DkDrb/colorful-pills-syringe.jpg"}
+                alt={item.product?.medicineName}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <Badge className="absolute top-3 right-3 z-20 bg-white/90 text-indigo-700 font-bold text-xs shadow">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+              {/* Qty badge */}
+              <span className="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur text-slate-700 dark:text-slate-200 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm">
                 Qty: {item.quantity}
-              </Badge>
-            </CardHeader>
+              </span>
+            </div>
 
-            <CardContent className="p-4">
-              <CardTitle className={`text-sm font-bold line-clamp-2 mb-1 ${dark ? "text-slate-100" : "text-slate-800"}`}>
-                {item.product.medicineName}
-              </CardTitle>
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-indigo-500 font-bold text-base">৳ {item.product.price}</span>
-                <span className={`text-xs ${dark ? "text-slate-400" : "text-slate-400"}`}>
-                  Subtotal:{" "}
-                  <span className={`font-semibold ${dark ? "text-slate-300" : "text-slate-600"}`}>
-                    ৳ {item.product.price * item.quantity}
+            {/* Info */}
+            <div className="p-4">
+              <p className="font-semibold text-sm text-slate-800 dark:text-slate-100 line-clamp-2 mb-3 leading-snug">
+                {item.product?.medicineName}
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
+                  ৳ {item.product?.price?.toLocaleString()}
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  Total:{" "}
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    ৳ {(item.product?.price * item.quantity).toLocaleString()}
                   </span>
                 </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* ─── Summary Bar ─── */}
-      <div className="max-w-5xl mx-auto">
-        <div className={`rounded-2xl shadow-lg p-5 flex items-center justify-between gap-4
-          ${dark ? "bg-[#1a1d27] border border-slate-700/50" : "bg-white"}`}
-        >
-          <div>
-            <p className={`text-sm ${dark ? "text-slate-400" : "text-slate-500"}`}>Order Total</p>
-            <p className="text-2xl font-black text-indigo-500">৳ {totalAmount.toLocaleString()}</p>
-          </div>
-          <Button
-            onClick={() => setOpen(true)}
-            size="lg"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 rounded-xl shadow-md transition-all duration-200 flex items-center gap-2"
-          >
-            Proceed to Checkout <ChevronRight className="w-4 h-4" />
-          </Button>
+      {/* ── Summary + Checkout Bar ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+        className="rounded-2xl border border-slate-200/70 dark:border-white/[0.07] bg-white dark:bg-slate-900/50 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      >
+        <div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Order Total</p>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+            ৳ {totalAmount.toLocaleString()}
+          </p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Free delivery included</p>
         </div>
-      </div>
+        <button
+          onClick={() => setOpen(true)}
+          id="cart-checkout-btn"
+          className="flex items-center gap-2 h-11 px-6 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/25 transition-all duration-200 active:scale-[0.98]"
+        >
+          Proceed to Checkout
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </motion.div>
 
       {/* ──────────── Checkout Dialog ──────────── */}
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent
-          className={`max-w-lg rounded-3xl border-0 shadow-2xl p-0 overflow-hidden
-            ${dark ? "bg-[#1a1d27] text-slate-100" : "bg-white text-slate-800"}`}
-        >
-          {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5">
-            <DialogTitle className="text-white text-lg font-bold flex items-center gap-2">
-              <Package className="w-5 h-5" /> Confirm Your Order
-            </DialogTitle>
-            <p className="text-indigo-200 text-sm mt-0.5">Fill in details & choose payment</p>
-          </div>
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+            />
 
-          <div className="px-6 py-5 space-y-5 max-h-[70vh] overflow-y-auto">
-            {/* Order Summary */}
-            <div className={`rounded-2xl p-4 space-y-2.5 ${dark ? "bg-[#12151f]" : "bg-slate-50"}`}>
-              <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${dark ? "text-slate-400" : "text-slate-500"}`}>
-                Order Summary
-              </p>
-              {product.map((item: any) => (
-                <div key={item.id} className={`flex justify-between text-sm ${dark ? "text-slate-300" : "text-slate-700"}`}>
-                  <span className="font-medium">
-                    {item.product.medicineName}{" "}
-                    <span className={dark ? "text-slate-500" : "text-slate-400"}>× {item.quantity}</span>
-                  </span>
-                  <span className="font-bold">৳ {item.product.price * item.quantity}</span>
+            {/* Sheet / Modal */}
+            <motion.div
+              key="dialog"
+              initial={{ opacity: 0, y: 40, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 40, scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              className="fixed inset-x-4 bottom-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 z-50 w-full sm:w-[480px] max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl bg-white dark:bg-slate-950 border border-slate-200/60 dark:border-white/[0.08] flex flex-col"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-5 flex items-start justify-between shrink-0">
+                <div>
+                  <h2 className="text-white font-bold text-lg flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    Confirm Your Order
+                  </h2>
+                  <p className="text-emerald-100 text-sm mt-0.5">
+                    Fill in delivery details &amp; choose payment
+                  </p>
                 </div>
-              ))}
-              <div className={`border-t pt-2.5 flex justify-between font-black text-base text-indigo-500
-                ${dark ? "border-slate-700" : "border-slate-200"}`}>
-                <span>Total</span>
-                <span>৳ {totalAmount.toLocaleString()}</span>
-              </div>
-            </div>
-
-            {/* Delivery Info */}
-            <div className="space-y-3">
-              <p className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-slate-400" : "text-slate-500"}`}>
-                Delivery Information
-              </p>
-
-              {/* Name */}
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={`pl-10 rounded-xl border transition-colors
-                    ${dark
-                      ? "bg-[#12151f] border-slate-600 text-slate-100 placeholder:text-slate-500 focus:border-indigo-400"
-                      : "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-indigo-400"
-                    }`}
-                />
-              </div>
-
-              {/* Phone */}
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  placeholder="Mobile Number (e.g. 01XXXXXXXXX)"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={`pl-10 rounded-xl border transition-colors
-                    ${dark
-                      ? "bg-[#12151f] border-slate-600 text-slate-100 placeholder:text-slate-500 focus:border-indigo-400"
-                      : "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-indigo-400"
-                    }`}
-                />
-              </div>
-
-              {/* Address */}
-              <div className="relative">
-                <MapPin className="absolute left-3 top-3.5 w-4 h-4 text-slate-400" />
-                <textarea
-                  placeholder="Full Shipping Address"
-                  value={shippingAddress}
-                  onChange={(e) => setShippingAddress(e.target.value)}
-                  rows={2}
-                  className={`w-full pl-10 pr-3 py-2.5 rounded-xl border focus:ring-2 focus:ring-indigo-100 outline-none text-sm resize-none transition-colors
-                    ${dark
-                      ? "bg-[#12151f] border-slate-600 text-slate-100 placeholder:text-slate-500 focus:border-indigo-400"
-                      : "bg-white border-slate-200 text-slate-800 placeholder:text-slate-400 focus:border-indigo-400"
-                    }`}
-                />
-              </div>
-            </div>
-
-            {/* Payment Method */}
-            <div className="space-y-3">
-              <p className={`text-xs font-bold uppercase tracking-widest ${dark ? "text-slate-400" : "text-slate-500"}`}>
-                Payment Method
-              </p>
-
-              <div className="grid grid-cols-2 gap-3">
-                {/* COD */}
                 <button
-                  onClick={() => setPaymentMethod("cod")}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer
-                    ${codActive
-                      ? "border-emerald-500 bg-emerald-500/10 shadow-md"
-                      : dark
-                        ? "border-slate-700 bg-[#12151f] hover:border-emerald-500/40 hover:bg-emerald-500/5"
-                        : "border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/50"
-                    }`}
+                  onClick={() => setOpen(false)}
+                  className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors"
+                  aria-label="Close"
                 >
-                  <div className={`p-2 rounded-xl ${codActive ? "bg-emerald-500" : dark ? "bg-slate-700" : "bg-slate-100"}`}>
-                    <Truck className={`w-5 h-5 ${codActive ? "text-white" : dark ? "text-slate-300" : "text-slate-500"}`} />
-                  </div>
-                  <span className={`text-xs font-bold text-center leading-tight
-                    ${codActive ? "text-emerald-500" : dark ? "text-slate-300" : "text-slate-600"}`}>
-                    Cash on Delivery
-                  </span>
-                  {codActive && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
-                </button>
-
-                {/* Stripe */}
-                <button
-                  onClick={() => setPaymentMethod("stripe")}
-                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer
-                    ${stripeActive
-                      ? "border-indigo-500 bg-indigo-500/10 shadow-md"
-                      : dark
-                        ? "border-slate-700 bg-[#12151f] hover:border-indigo-500/40 hover:bg-indigo-500/5"
-                        : "border-slate-200 bg-white hover:border-indigo-300 hover:bg-indigo-50/50"
-                    }`}
-                >
-                  <div className={`p-2 rounded-xl ${stripeActive ? "bg-indigo-500" : dark ? "bg-slate-700" : "bg-slate-100"}`}>
-                    <CreditCard className={`w-5 h-5 ${stripeActive ? "text-white" : dark ? "text-slate-300" : "text-slate-500"}`} />
-                  </div>
-                  <span className={`text-xs font-bold text-center leading-tight
-                    ${stripeActive ? "text-indigo-400" : dark ? "text-slate-300" : "text-slate-600"}`}>
-                    Pay Online
-                  </span>
-                  {stripeActive && <CheckCircle2 className="w-4 h-4 text-indigo-400" />}
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            </div>
 
-            {/* Action Button */}
-            {paymentMethod === "cod" && (
-              <Button
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl h-12 shadow-lg shadow-emerald-500/20 flex items-center gap-2"
-                disabled={!canProceed || loading}
-                onClick={postCodOrder}
-              >
-                <Truck className="w-4 h-4" />
-                {loading ? "Placing Order..." : "Place Order (COD)"}
-              </Button>
-            )}
+              {/* Scrollable body */}
+              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
 
-            {paymentMethod === "stripe" && (
-              <Button
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-12 shadow-lg shadow-indigo-500/20 flex items-center gap-2"
-                disabled={!canProceed}
-                onClick={goToStripe}
-              >
-                <CreditCard className="w-4 h-4" />
-                Continue to Payment
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            )}
+                {/* Order Summary */}
+                <div className="rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-white/[0.06] p-4 space-y-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                    Order Summary
+                  </p>
+                  {product.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-3">
+                      <img
+                        src={item.product?.image ?? "https://i.ibb.co/yc1DkDrb/colorful-pills-syringe.jpg"}
+                        alt={item.product?.medicineName}
+                        className="w-9 h-9 rounded-lg object-cover border border-slate-200 dark:border-white/10 shrink-0"
+                      />
+                      <span className="flex-1 text-sm text-slate-700 dark:text-slate-300 font-medium truncate">
+                        {item.product?.medicineName}
+                        <span className="text-slate-400 dark:text-slate-500 ml-1">× {item.quantity}</span>
+                      </span>
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-200 shrink-0">
+                        ৳ {(item.product?.price * item.quantity).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                  <div className="pt-3 border-t border-slate-200 dark:border-white/[0.08] flex justify-between font-black text-emerald-600 dark:text-emerald-400">
+                    <span>Total</span>
+                    <span>৳ {totalAmount.toLocaleString()}</span>
+                  </div>
+                </div>
 
-            {!paymentMethod && (
-              <Button
-                className={`w-full font-bold rounded-xl h-12 cursor-not-allowed
-                  ${dark ? "bg-slate-700 text-slate-500" : "bg-slate-200 text-slate-400"}`}
-                disabled
-              >
-                Select a Payment Method
-              </Button>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+                {/* Delivery Info */}
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                    Delivery Information
+                  </p>
+
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                    <input
+                      id="checkout-name"
+                      className={inputCls}
+                      placeholder="Full Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                    <input
+                      id="checkout-phone"
+                      className={inputCls}
+                      placeholder="Mobile Number (01XXXXXXXXX)"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 w-4 h-4 text-slate-400" strokeWidth={1.75} />
+                    <textarea
+                      id="checkout-address"
+                      className={cn(
+                        "w-full pl-10 pr-3.5 py-2.5 rounded-xl text-sm outline-none resize-none transition-all duration-200",
+                        "bg-slate-50 dark:bg-slate-900/60",
+                        "border border-slate-200 dark:border-white/10",
+                        "text-slate-900 dark:text-slate-100",
+                        "placeholder-slate-400 dark:placeholder-slate-500",
+                        "focus:ring-2 focus:ring-emerald-400/40 focus:border-emerald-400"
+                      )}
+                      placeholder="Full Shipping Address"
+                      rows={2}
+                      value={shippingAddress}
+                      onChange={(e) => setShippingAddress(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                {/* Payment Method */}
+                <div className="space-y-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                    Payment Method
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* COD */}
+                    <button
+                      type="button"
+                      id="payment-method-cod"
+                      onClick={() => setPaymentMethod("cod")}
+                      className={cn(
+                        "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200",
+                        paymentMethod === "cod"
+                          ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 shadow-sm"
+                          : "border-slate-200 dark:border-white/10 hover:border-emerald-300 dark:hover:border-emerald-500/40 hover:bg-emerald-50/50 dark:hover:bg-emerald-500/5"
+                      )}
+                    >
+                      <span className={cn(
+                        "flex items-center justify-center w-9 h-9 rounded-xl transition-colors",
+                        paymentMethod === "cod" ? "bg-emerald-500" : "bg-slate-100 dark:bg-white/10"
+                      )}>
+                        <Truck className={cn("w-5 h-5", paymentMethod === "cod" ? "text-white" : "text-slate-500 dark:text-slate-400")} strokeWidth={1.75} />
+                      </span>
+                      <span className={cn("text-xs font-bold text-center", paymentMethod === "cod" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400")}>
+                        Cash on Delivery
+                      </span>
+                      {paymentMethod === "cod" && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                    </button>
+
+                    {/* Stripe */}
+                    <button
+                      type="button"
+                      id="payment-method-stripe"
+                      onClick={() => setPaymentMethod("stripe")}
+                      className={cn(
+                        "flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-200",
+                        paymentMethod === "stripe"
+                          ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 shadow-sm"
+                          : "border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/40 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/5"
+                      )}
+                    >
+                      <span className={cn(
+                        "flex items-center justify-center w-9 h-9 rounded-xl transition-colors",
+                        paymentMethod === "stripe" ? "bg-indigo-500" : "bg-slate-100 dark:bg-white/10"
+                      )}>
+                        <CreditCard className={cn("w-5 h-5", paymentMethod === "stripe" ? "text-white" : "text-slate-500 dark:text-slate-400")} strokeWidth={1.75} />
+                      </span>
+                      <span className={cn("text-xs font-bold text-center", paymentMethod === "stripe" ? "text-indigo-600 dark:text-indigo-400" : "text-slate-600 dark:text-slate-400")}>
+                        Pay Online
+                      </span>
+                      {paymentMethod === "stripe" && <CheckCircle2 className="w-4 h-4 text-indigo-500" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Error */}
+                <AnimatePresence>
+                  {orderError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-sm text-red-600 dark:text-red-400"
+                    >
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      {orderError}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Action Buttons */}
+                {paymentMethod === "cod" && (
+                  <button
+                    id="place-cod-order-btn"
+                    disabled={!canProceed || loading}
+                    onClick={postCodOrder}
+                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Placing Order…</> : <><Truck className="w-4 h-4" /> Place Order (COD)</>}
+                  </button>
+                )}
+
+                {paymentMethod === "stripe" && (
+                  <button
+                    id="go-to-stripe-btn"
+                    disabled={!canProceed}
+                    onClick={goToStripe}
+                    className="w-full flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    Continue to Payment
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
+
+                {!paymentMethod && (
+                  <button
+                    disabled
+                    className="w-full h-11 rounded-xl text-sm font-semibold bg-slate-100 dark:bg-white/[0.05] text-slate-400 dark:text-slate-600 cursor-not-allowed"
+                  >
+                    Select a Payment Method
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

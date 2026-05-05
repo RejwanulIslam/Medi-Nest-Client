@@ -3,7 +3,6 @@ const API_URL = process.env.API_URL
 
 
 const AUTH_URL = process.env.AUTH_URL
-console.log(AUTH_URL)
 export const userService = {
     getSeation: async function () {
         const cookieStore = await cookies();
@@ -22,7 +21,7 @@ export const userService = {
                 console.error("Auth Server Error Text:", errorText);
                 return { data: null, error: { message: "Session unauthorized" } };
             }
-            
+
             // check valid json
             const contentType = res.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
@@ -92,32 +91,32 @@ export const userService = {
     },
 
 
-  manageProfile: async function (Profildata: any, id: string) {
-  const cookieStore = await cookies()
+    manageProfile: async function (Profildata: any, id: string) {
+        const cookieStore = await cookies()
 
-  try {
-    const res = await fetch(`${API_URL}/api/user/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: cookieStore.getAll()
-          .map((c) => `${c.name}=${c.value}`)
-          .join("; "),
-      },
-      body: JSON.stringify(Profildata),
-      cache: "no-store",
-    })
+        try {
+            const res = await fetch(`${API_URL}/api/user/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Cookie: cookieStore.getAll()
+                        .map((c) => `${c.name}=${c.value}`)
+                        .join("; "),
+                },
+                body: JSON.stringify(Profildata),
+                cache: "no-store",
+            })
 
-    const data = await res.json()
+            const data = await res.json()
 
-    if (!res.ok) {
-      return { data: null, error: { message: data?.message ?? "Update failed" } }
-    }
+            if (!res.ok) {
+                return { data: null, error: { message: data?.message ?? "Update failed" } }
+            }
 
-    return { data: data, error: null }
+            return { data: data, error: null }
 
-  } catch (error: any) {
-    return { data: null, error: { message: error.message } }
-  }
-},
+        } catch (error: any) {
+            return { data: null, error: { message: error.message } }
+        }
+    },
 }

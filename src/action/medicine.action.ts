@@ -22,7 +22,7 @@ export const getSeation = async () => {
   }
 };
 
-export const getMedicine = async (params?:any) => {
+export const getMedicine = async (params?: any) => {
   try {
     const res = await medicineService.getMedicine(params);
     if (res.error) throw new Error(res.error.message);
@@ -36,6 +36,7 @@ export const getMedicine = async (params?:any) => {
 
 
 export const createMedicine = async (data: CreateMedicineInput) => {
+  console.log(data)
   try {
     const res = await medicineService.createMedicine(data);
     if (res.error) throw new Error(res.error.message);
@@ -44,7 +45,7 @@ export const createMedicine = async (data: CreateMedicineInput) => {
     return null;
   }
 };
-export const deleteMedicine = async (id:string) => {
+export const deleteMedicine = async (id: string) => {
   try {
     const res = await medicineService.deleteMedicine(id);
     if (res.error) throw new Error(res.error.message);
@@ -55,9 +56,9 @@ export const deleteMedicine = async (id:string) => {
 };
 
 
-export const updateMedicine = async ( data: any,id: string,) => {
+export const updateMedicine = async (data: any, id: string,) => {
   try {
-    const res = await medicineService.updateMedicine( data,id);
+    const res = await medicineService.updateMedicine(data, id);
     if (res.error) throw new Error(res.error.message);
     return res.data;
   } catch (error: any) {
@@ -65,7 +66,7 @@ export const updateMedicine = async ( data: any,id: string,) => {
   }
 };
 
-export const addCard = async (data:any) => {
+export const addCard = async (data: any) => {
   try {
     const res = await cardService.addCard(data);
     if (res.error) throw new Error(res.error.message);
@@ -74,7 +75,7 @@ export const addCard = async (data:any) => {
     return null;
   }
 };
-export const deleteCard = async (data:string[]) => {
+export const deleteCard = async (data: string[]) => {
   try {
     const res = await cardService.deleteCard(data);
     if (res.error) throw new Error(res.error.message);
@@ -85,11 +86,12 @@ export const deleteCard = async (data:string[]) => {
 };
 
 
-export const crateOrder = async (data:any) => {
+export const crateOrder = async (data: any) => {
   try {
     const res = await orderService.CreateOrder(data);
-    if (res.error) throw new Error(res.error.message);
-    return res.data;
+    return res;
+    // if (res.error) throw new Error(res.error.message);
+    return res;
   } catch (error: any) {
     return null;
   }
@@ -103,16 +105,16 @@ export const getAllOrder = async () => {
     return null;
   }
 };
-export const updateOrder = async (status:string,id:string) => {
+export const updateOrder = async (status: string, id: string) => {
   try {
-    const res = await orderService.uppdateOrder(status,id);
+    const res = await orderService.uppdateOrder(status, id);
     if (res.error) throw new Error(res.error.message);
     return res.data;
   } catch (error: any) {
     return null;
   }
 };
-export const addReview = async (data:any) => {
+export const addReview = async (data: any) => {
   try {
     const res = await reviewService.addReview(data);
     if (res.error) throw new Error(res.error.message);
@@ -123,30 +125,33 @@ export const addReview = async (data:any) => {
 
 };
 
-export const getReview = async (id:string) => {
+export const getReview = async (id: string) => {
   try {
     const res = await reviewService.getReview(id);
     if (res.error) throw new Error(res.error.message);
     return res.data;
   } catch (error: any) {
     return null;
-  }}
-export const updateUserStatus = async (status:string,id:string) => {
+  }
+}
+export const updateUserStatus = async (status: string, id: string) => {
   try {
-    const res = await userService.updateUserStatus(status,id);
+    const res = await userService.updateUserStatus(status, id);
     if (res.error) throw new Error(res.error.message);
     return res.data;
   } catch (error: any) {
     return null;
-  }}
-export const manageUser = async (data:any,id:string) => {
+  }
+}
+export const manageUser = async (data: any, id: string) => {
   try {
-    const res = await userService.manageProfile(data,id);
+    const res = await userService.manageProfile(data, id);
     if (res.error) throw new Error(res.error.message);
     return res.data;
   } catch (error: any) {
     return null;
-  }}
+  }
+}
 
 export const getCategory = async () => {
   try {
@@ -155,20 +160,23 @@ export const getCategory = async () => {
     return res.data;
   } catch (error: any) {
     return null;
-  }}
-export const addCategory = async (data:any) => {
+  }
+}
+export const addCategory = async (data: any) => {
   try {
     const res = await categoryService.addCategory(data);
     if (res.error) throw new Error(res.error.message);
     return res.data;
   } catch (error: any) {
     return null;
-  }}
-export const deleteCategory = async (id:string) => {
+  }
+}
+export const deleteCategory = async (id: string) => {
   try {
     const res = await categoryService.deleteCategory(id);
     if (res.error) throw new Error(res.error.message);
     return res.data;
   } catch (error: any) {
     return null;
-  }}
+  }
+}
