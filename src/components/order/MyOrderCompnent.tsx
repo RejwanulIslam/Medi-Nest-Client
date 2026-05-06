@@ -57,9 +57,9 @@ export default function MyOrdersCompnent({ ORDERS }: any) {
     const [filter, setFilter] = useState<Order["status"] | "All">("All");
 
     const filtered =
-        filter === "All" ? ORDERS : ORDERS?.data?.filter((o: any) => o.status === filter);
+        filter === "All" ? ORDERS : (ORDERS?.data || [])?.filter((o: any) => o.status === filter);
 
-    const totalRevenue = ORDERS?.data?.reduce((s: any, o: any) => s + o.totalAmount, 0) || [];
+    const totalRevenue = (ORDERS?.data || []).reduce((s: any, o: any) => s + o.totalAmount, 0) || [];
 
 
     const statusOptions: (Order["status"] | "All")[] = [

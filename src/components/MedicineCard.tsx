@@ -28,13 +28,13 @@ export function MedicineCard({ medCategory, medData }: { medCategory: string[], 
 
   const manufacturers = Array.from(
     new Set(
-      (Array.isArray(medData) ? medData : [])?.map((item: any) => item.manufacturer).filter(Boolean)
+      (Array.isArray(medData) ? medData : [])?.map((item: any) => item.manufacturer)?.filter(Boolean)
     )
   );
 
   const categorys = Array.from(
     new Set(
-      (Array.isArray(medCategory) ? medCategory : [])?.map((item: any) => item.categorieName).filter(Boolean)
+      (Array.isArray(medCategory) ? medCategory : [])?.map((item: any) => item.categorieName)?.filter(Boolean)
     )
   );
 

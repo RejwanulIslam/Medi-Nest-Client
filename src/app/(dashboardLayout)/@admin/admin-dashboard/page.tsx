@@ -8,10 +8,10 @@ export default async function AdminDashboardPage() {
   const res = await userService.getAlluser()
   const { data } = await userService.getAlluser()
   console.log(data)
-  const seler = data.filter((data: any) => data?.role == "SELLER")
+  const seler = (data ?? []).filter((data: any) => data?.role == "SELLER")
   const allOrders = await getAllOrder()
   const totalRevenue = allOrders.reduce((sum: any, g: any) => sum + g?.order?.totalAmount, 0)
-  const pendingOrders = allOrders.filter((order: any) => order?.order?.status == "Pending")
+  const pendingOrders = (allOrders || []).filter((order: any) => order?.order?.status == "Pending")
   const { data: medData } = await medicineService.getMedicine()
 
 

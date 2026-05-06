@@ -71,7 +71,6 @@ export const orderService = {
             // check response
             if (!res.ok) {
                 const errorText = await res.text();
-                console.error("API Error Response:", errorText);
                 return { data: null, error: errorText };
             }
             const result = await res.json()

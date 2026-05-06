@@ -89,15 +89,32 @@ function formatDate(dateStr: string) {
   })
 }
 
-function groupOrdersByOrderId(items: OrderItem[]) {
-  const map = new Map<string, { order: OrderInfo; items: OrderItem[] }>()
-  for (const item of items) {
-    if (!map.has(item.orderId)) {
-      map.set(item.orderId, { order: item.order, items: [] })
+function processOrders(data: any): { order: OrderInfo; items: OrderItem[] }[] {
+  let items = Array.isArray(data) ? data : (data?.data || []);
+  if (!Array.isArray(items)) return [];
+
+  // If the array is empty, return empty
+  if (items.length === 0) return [];
+
+  // Check if it's an array of OrderItems (has orderId)
+  if (items[0].orderId !== undefined) {
+    const map = new Map<string, { order: OrderInfo; items: OrderItem[] }>()
+    for (const item of items) {
+      if (!item?.order || !item?.orderId) continue
+
+      if (!map.has(item.orderId)) {
+        map.set(item.orderId, { order: item.order, items: [] })
+      }
+      map.get(item.orderId)!.items.push(item)
     }
-    map.get(item.orderId)!.items.push(item)
+    return Array.from(map.values())
+  } else {
+    // Otherwise, assume it's an array of Orders
+    return items.map((order: any) => ({
+      order: order,
+      items: order.items || []
+    }))
   }
-  return Array.from(map.values())
 }
 
 const cardVariants = {
@@ -237,23 +254,23 @@ const containerVariants = {
   show: { opacity: 1, transition: { staggerChildren: 0.07 } },
 }
 
-export default function AllOrdersClient({ allOrders }: { allOrders: OrderItem[] }) {
+export default function AllOrdersClient({ allOrders }: { allOrders: any }) {
   const [filter, setFilter] = useState<FilterType>('All')
 
-  const groupedOrders = useMemo(() => groupOrdersByOrderId(allOrders), [allOrders])
+  const groupedOrders = useMemo(() => processOrders(allOrders), [allOrders])
 
   const filteredGroups = useMemo(() =>
     filter === 'All'
       ? groupedOrders
-      : groupedOrders.filter(g => g.order.status === filter),
+      : (groupedOrders || []).filter(g => g.order.status === filter),
     [filter, groupedOrders]
   )
 
   const stats = useMemo(() => ({
-    total: groupedOrders.length,
-    delivered: groupedOrders.filter(g => g.order.status === 'Delivered').length,
-    pending: groupedOrders.filter(g => g.order.status === 'Pending').length,
-    totalAmount: groupedOrders.reduce((sum, g) => sum + g.order.totalAmount, 0),
+    total: (groupedOrders || []).length,
+    delivered: (groupedOrders || [])?.filter(g => g.order?.status === 'Delivered')?.length,
+    pending: (groupedOrders || [])?.filter(g => g.order?.status === 'Pending')?.length,
+    totalAmount: (groupedOrders || [])?.reduce((sum: any, g: any) => sum + g.order?.totalAmount, 0),
   }), [groupedOrders])
 
   return (
@@ -314,17 +331,18 @@ export default function AllOrdersClient({ allOrders }: { allOrders: OrderItem[] 
       >
         <Filter className="w-4 h-4 text-slate-400 flex-shrink-0" />
         {STATUS_FILTERS.map((s) => {
-          const count = s === 'All' ? groupedOrders.length : groupedOrders.filter(g => g.order.status === s).length
+          const count = s === 'All'
+            ? (groupedOrders || []).length
+            : (groupedOrders || []).filter(g => g.order?.status === s).length
           const isActive = filter === s
           return (
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`text-xs font-bold px-4 py-2 rounded-full border transition-all duration-200 ${
-                isActive
-                  ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-md shadow-indigo-200 dark:shadow-indigo-900/40 scale-105'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600'
-              }`}
+              className={`text-xs font-bold px-4 py-2 rounded-full border transition-all duration-200 ${isActive
+                ? 'bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-md shadow-indigo-200 dark:shadow-indigo-900/40 scale-105'
+                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600'
+                }`}
             >
               {s} <span className="opacity-60 ml-0.5">({count})</span>
             </button>
@@ -356,7 +374,7 @@ export default function AllOrdersClient({ allOrders }: { allOrders: OrderItem[] 
             animate="show"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
           >
-            {filteredGroups.map(({ order, items }) => (
+            {(filteredGroups || []).map(({ order, items }) => (
               <OrderGroupCard key={order.id} order={order} items={items} />
             ))}
           </motion.div>

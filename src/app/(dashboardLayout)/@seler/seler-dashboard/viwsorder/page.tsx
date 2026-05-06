@@ -6,17 +6,17 @@ export default async function SellerOrdersPage() {
   const allOrders = await getAllOrder()
   const { data } = await userService.getSeation()
 
-  const myOrders = allOrders.filter(
+  const myOrders = (allOrders || []).filter(
     (item: any) => item.product?.sellerId === data.user.id
   )
 
   // Summary stats
-  const totalRevenue = myOrders.reduce(
-    (sum: number, item: any) => sum + (item.order?.totalAmount || 0),
+  const totalRevenue = (myOrders || []).reduce(
+    (sum: number, item: any) => sum + (item?.order?.totalAmount || 0),
     0
   )
-  const statusCounts = myOrders.reduce((acc: Record<string, number>, item: any) => {
-    const s = item.order?.status || "Pending"
+  const statusCounts = (myOrders || []).reduce((acc: Record<string, number>, item: any) => {
+    const s = item?.order?.status || "Pending"
     acc[s] = (acc[s] || 0) + 1
     return acc
   }, {})

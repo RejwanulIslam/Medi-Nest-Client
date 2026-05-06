@@ -91,7 +91,6 @@ export const crateOrder = async (data: any) => {
     const res = await orderService.CreateOrder(data);
     return res;
     // if (res.error) throw new Error(res.error.message);
-    return res;
   } catch (error: any) {
     return null;
   }
